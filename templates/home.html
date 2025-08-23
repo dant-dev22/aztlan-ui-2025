@@ -11,7 +11,7 @@
 <body class="bg-gray-100">
 
     <!-- Navbar -->
-    <nav class="bg-black md:bg-transparent text-white fixed w-full z-50">
+    <nav class="bg-black md:bg-transparent text-white fixed w-full z-50 transition-colors duration-300 ease-in-out">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <!-- Logo -->
@@ -74,33 +74,54 @@
 
     <!-- Scripts -->
     <script>
-        // Scroll suave desde botón del hero
         document.addEventListener("DOMContentLoaded", function() {
+            const navEl = document.querySelector('nav');
+            const toBlack = () => {
+                navEl.classList.add('md:bg-black');
+                navEl.classList.remove('md:bg-transparent');
+            };
+            const toTransparent = () => {
+                navEl.classList.add('md:bg-transparent');
+                navEl.classList.remove('md:bg-black');
+            };
+
             const btn = document.getElementById('btn-register');
             const formSection = document.getElementById('register-form');
 
+            // Botón del hero -> scroll y navbar negro
             btn.addEventListener('click', () => {
                 formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                toBlack();
             });
 
-            // Scroll suave desde links del navbar
-            const navLinks = document.querySelectorAll('a[href="#register-form"]');
+            // Links del navbar
+            const navLinks = document.querySelectorAll('nav a');
             navLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
+                const href = link.getAttribute('href');
+
+                if (href === "/") {
+                    // Inicio -> scroll to top y navbar transparente
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        toTransparent();
+                    });
+                } else if (href === "#register-form") {
+                    // Registrarse -> scroll y navbar negro
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        toBlack();
+                    });
+                } else {
+                    // Cualquier otro (p. ej. /continue) -> navbar negro
+                    link.addEventListener('click', () => {
+                        toBlack();
+                    });
+                }
             });
 
-            const homeLinks = document.querySelectorAll('a[href="/"]');
-            homeLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                });
-            });
-
-            // Toggle mobile menu
+            // Toggle mobile menu (sin afectar colores)
             const btnMobile = document.getElementById('mobile-menu-button');
             const menuMobile = document.getElementById('mobile-menu');
             btnMobile.addEventListener('click', () => {
