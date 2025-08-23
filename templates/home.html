@@ -2,29 +2,54 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Inicio</title>
+    <title>Inicio - Torneo</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        html { scroll-behavior: smooth; }
+    </style>
 </head>
 <body class="bg-gray-100">
 
-    <!-- Incluir navbar -->
+    <!-- Navbar -->
     {% include "navbar.html" %}
 
-    <div class="flex items-center justify-center h-screen">
-        <div class="bg-white p-8 rounded-2xl shadow-md text-center space-y-6">
-            <h1 class="text-2xl font-bold text-gray-800">Bienvenido</h1>
-            <p class="text-gray-600">Selecciona una opción para continuar</p>
+    <!-- Hero Section -->
+    <div class="relative w-full h-screen bg-gray-800">
+        <img src="https://cdn.evolve-university.com/wp-content/uploads/2022/08/5-techniques-in-mma-.jpeg" 
+             alt="Hero Image" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-4 space-y-6">
+            <h1 class="text-4xl md:text-6xl font-bold drop-shadow-lg">Bienvenido al Torneo</h1>
+            <p class="text-lg md:text-2xl drop-shadow-lg">Regístrate y participa</p>
 
             <div class="space-x-4">
-                <a href="/register" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <button id="btn-register" class="px-6 py-3 bg-blue-600 rounded-lg hover:bg-blue-700 transition">
                     Registrarse
-                </a>
-                <a href="/continue" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                </button>
+                <a href="/continue" class="px-6 py-3 bg-green-600 rounded-lg hover:bg-green-700 transition">
                     Continuar registro
                 </a>
             </div>
         </div>
     </div>
+
+    <!-- Form Section -->
+    <section id="register-form" class="my-20">
+        {% include "register.html" %}
+    </section>
+
+    <!-- Script para scroll suave -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const btn = document.getElementById('btn-register');
+        const formSection = document.getElementById('register-form');
+
+        btn.addEventListener('click', () => {
+            formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+    </script>
 
 </body>
 </html>

@@ -9,101 +9,61 @@
     <div class="max-w-xl mx-auto bg-white p-8 rounded shadow">
         <h1 class="text-2xl font-bold mb-6">Register Participant</h1>
 
-        <!-- Mensaje de éxito -->
-        {% if message %}
-            <div class="bg-green-100 text-green-800 p-4 mb-4 rounded">
-                {{ message }}
-            </div>
-        {% endif %}
+        <!-- Mensaje de éxito y error -->
+        <div id="successMessage" class="hidden bg-green-100 text-green-800 p-4 mb-4 rounded"></div>
+        <div id="errorMessage" class="hidden bg-red-100 text-red-800 p-4 mb-4 rounded"></div>
 
         <!-- Formulario -->
-        <form id="registerForm" method="post" class="space-y-4">
+        <form id="registerForm" class="space-y-4">
             <div>
                 <label class="block mb-1 font-medium">Full Name:</label>
-                <input name="name" value="{{ form_data.name or '' }}" class="w-full p-2 border rounded" required>
-                {% if errors.name %}
-                    <p class="text-red-600 text-sm">{{ errors.name }}</p>
-                {% endif %}
+                <input name="name" class="w-full p-2 border rounded" required>
             </div>
 
             <div>
                 <label class="block mb-1 font-medium">Birth Date:</label>
-                <input type="date" name="birth_date" value="{{ form_data.birth_date or '' }}" class="w-full p-2 border rounded" required>
-                {% if errors.birth_date %}
-                    <p class="text-red-600 text-sm">{{ errors.birth_date }}</p>
-                {% endif %}
+                <input type="date" name="birth_date" class="w-full p-2 border rounded" required>
             </div>
 
             <div>
                 <label class="block mb-1 font-medium">Weight (kg):</label>
-                <input type="number" step="0.1" name="weight" value="{{ form_data.weight or '' }}" class="w-full p-2 border rounded" required>
-                {% if errors.weight %}
-                    <p class="text-red-600 text-sm">{{ errors.weight }}</p>
-                {% endif %}
+                <input type="number" step="0.1" name="weight" class="w-full p-2 border rounded" required>
             </div>
 
             <div>
                 <label class="block mb-1 font-medium">Height (cm):</label>
-                <input type="number" step="0.1" name="height" value="{{ form_data.height or '' }}" class="w-full p-2 border rounded" required>
-                {% if errors.height %}
-                    <p class="text-red-600 text-sm">{{ errors.height }}</p>
-                {% endif %}
+                <input type="number" step="0.1" name="height" class="w-full p-2 border rounded" required>
             </div>
 
             <div>
                 <label class="block mb-1 font-medium">Academy:</label>
-                <input name="academy" value="{{ form_data.academy or '' }}" class="w-full p-2 border rounded" required>
-                {% if errors.academy %}
-                    <p class="text-red-600 text-sm">{{ errors.academy }}</p>
-                {% endif %}
+                <input name="academy" class="w-full p-2 border rounded" required>
             </div>
 
             <div>
                 <label class="block mb-1 font-medium">Category:</label>
-                <input name="category" value="{{ form_data.category or '' }}" class="w-full p-2 border rounded" required>
-                {% if errors.category %}
-                    <p class="text-red-600 text-sm">{{ errors.category }}</p>
-                {% endif %}
+                <input name="category" class="w-full p-2 border rounded" required>
             </div>
 
             <div>
                 <label class="block mb-1 font-medium">Email:</label>
-                <input type="email" name="email" value="{{ form_data.email or '' }}" class="w-full p-2 border rounded" required>
-                {% if errors.email %}
-                    <p class="text-red-600 text-sm">{{ errors.email }}</p>
-                {% endif %}
+                <input type="email" name="email" class="w-full p-2 border rounded" required>
             </div>
 
             <div>
                 <label class="block mb-1 font-medium">Grade:</label>
-                <input name="grade" value="{{ form_data.grade or '' }}" class="w-full p-2 border rounded">
-                {% if errors.grade %}
-                    <p class="text-red-600 text-sm">{{ errors.grade }}</p>
-                {% endif %}
+                <input name="grade" class="w-full p-2 border rounded">
             </div>
 
             <div>
                 <label class="block mb-1 font-medium">Belt:</label>
-                <input name="belt" value="{{ form_data.belt or 'white' }}" class="w-full p-2 border rounded">
-                {% if errors.belt %}
-                    <p class="text-red-600 text-sm">{{ errors.belt }}</p>
-                {% endif %}
+                <input name="belt" class="w-full p-2 border rounded" value="white">
             </div>
 
             <div>
                 <label class="block mb-1 font-medium">Torneo:</label>
-                <input name="torneo" value="{{ form_data.torneo or '' }}" class="w-full p-2 border rounded" required>
-                {% if errors.torneo %}
-                    <p class="text-red-600 text-sm">{{ errors.torneo }}</p>
-                {% endif %}
+                <input name="torneo" class="w-full p-2 border rounded" required>
             </div>
-
-            <!-- Error general -->
-            {% if errors.general %}
-                <div class="bg-red-100 text-red-800 p-4 mb-4 rounded">
-                    {{ errors.general }}
-                </div>
-            {% endif %}
 
             <div>
                 <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
@@ -121,15 +81,58 @@
     <script>
         const form = document.getElementById('registerForm');
         const loading = document.getElementById('loading');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
 
-        form.addEventListener('submit', () => {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
             loading.classList.remove('hidden');
+            successMessage.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+
+            const data = {
+                name: form.name.value,
+                birth_date: form.birth_date.value,
+                weight: parseFloat(form.weight.value),
+                height: parseFloat(form.height.value),
+                academy: form.academy.value,
+                category: form.category.value,
+                email: form.email.value,
+                grade: form.grade.value || null,
+                belt: form.belt.value || "white",
+                torneo: form.torneo.value,
+                payment_proof: null
+            };
+
+            try {
+                const res = await fetch('https://vjfpbq4jbiz5uyarfu7z7ahlhi0xbhmi.lambda-url.us-east-1.on.aws/participants', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+
+                if (!res.ok) {
+                    errorMessage.textContent = result.detail?.message || JSON.stringify(result);
+                    errorMessage.classList.remove('hidden');
+                } else {
+                    successMessage.textContent = result.message;
+                    successMessage.classList.remove('hidden');
+                    form.reset();
+                }
+            } catch (err) {
+                console.error(err);
+                errorMessage.textContent = "Error al registrar participante.";
+                errorMessage.classList.remove('hidden');
+            } finally {
+                loading.classList.add('hidden');
+            }
         });
     </script>
 
     <style>
         .loader {
-            border-top-color: #1DB954; /* Verde Spotify */
+            border-top-color: #1DB954;
             animation: spin 1s linear infinite;
         }
         @keyframes spin {
