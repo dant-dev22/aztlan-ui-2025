@@ -1,0 +1,20 @@
+# Entornos virtuales
+venv/
+.venv/
+env/
+ENV/
+
+# Carpeta de dependencias local
+dependencies/
+
+# Artefactos
+aws_lambda_artifact.zip
+
+# Python caches
+__pycache__/
+*.py[cod]
+
+# SO / IDE
+.DS_Store
+.vscode/
+.idea/

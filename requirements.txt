@@ -1,0 +1,5 @@
+fastapi
+jinja2
+httpx
+mangum
+python-multipart
