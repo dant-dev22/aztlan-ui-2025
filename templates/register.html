@@ -38,7 +38,6 @@
                 academy: form.academy.value,
                 category: form.category.value,
                 email: form.email.value,
-                grade: form.grade.value || null,
                 belt: form.belt.value || "white",
                 torneo: form.torneo.value,
                 payment_proof: null
@@ -69,7 +68,55 @@
             }
         });
     </script>
+    <script>
+        const birthDateInput = document.querySelector('input[name="birth_date"]');
+        const beltDiv = document.querySelector('select[name="belt"]').parentElement; // contenedor del select
+        const beltSelect = document.querySelector('select[name="belt"]');
 
+        const beltsKids = ["Blanco", "Gris", "Amarillo", "Naranja", "Verde"];
+        const beltsAdults = ["Blanco", "Azul", "Morado", "Cafe", "Negro"];
+
+        function calculateAge(date) {
+            const today = new Date();
+            const birthDate = new Date(date);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+            return age;
+        }
+
+        function updateBelts() {
+            const birthDate = birthDateInput.value;
+
+            if (!birthDate) {
+                // Ocultar cinturón si no hay fecha
+                beltDiv.style.display = "none";
+                beltSelect.innerHTML = "";
+                return;
+            }
+
+            const age = calculateAge(birthDate);
+            const options = age <= 15 ? beltsKids : beltsAdults;
+
+            // Mostrar el div y llenar opciones
+            beltDiv.style.display = "block";
+            beltSelect.innerHTML = "";
+            options.forEach(belt => {
+                const option = document.createElement("option");
+                option.value = belt.toLowerCase();
+                option.textContent = belt;
+                beltSelect.appendChild(option);
+            });
+
+            beltSelect.value = "blanca";
+        }
+
+        // Inicializar oculto
+        beltDiv.style.display = "none";
+
+        // Escuchar cambios en la fecha de nacimiento
+        birthDateInput.addEventListener("change", updateBelts);
+    </script>
     <style>
         .loader {
             border-top-color: #1DB954;

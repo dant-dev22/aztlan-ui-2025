@@ -43,7 +43,6 @@ async def submit_form(
     academy: str = Form(...),
     category: str = Form(...),
     email: str = Form(...),
-    grade: str | None = Form(None),
     belt: str | None = Form("white"),
     torneo: str = Form(...),
 ):
@@ -55,7 +54,6 @@ async def submit_form(
         "academy": academy,
         "category": category,
         "email": email,
-        "grade": grade,
         "belt": belt,
         "torneo": torneo
     }

@@ -9,6 +9,5 @@ class ParticipantForm(BaseModel):
     height: float
     category: str
     email: str
-    grade: str | None = None
     belt: str | None = "white"
     torneo: str
