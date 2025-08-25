@@ -48,14 +48,21 @@
 
     <!-- Hero Section -->
     <div class="relative w-full h-screen bg-gray-800">
+        <!-- Imagen de fondo -->
         <img src="https://cdn.evolve-university.com/wp-content/uploads/2022/08/5-techniques-in-mma-.jpeg" 
-             alt="Hero Image" class="w-full h-full object-cover">
+            alt="Hero Image" class="w-full h-full object-cover">
         <div class="absolute inset-0 bg-black bg-opacity-50"></div>
 
+        <!-- Contenido central -->
         <div class="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-4 space-y-6">
-            <h1 class="text-4xl md:text-6xl font-bold drop-shadow-lg">Bienvenido al Torneo</h1>
+            <!-- Título animado -->
+            <h1 id="typed-text" class="text-4xl md:text-6xl font-bold drop-shadow-lg text-white"
+                style="font-family: 'Bebas Neue', sans-serif;"></h1>
+
+            <!-- Subtítulo -->
             <p class="text-lg md:text-2xl drop-shadow-lg">Regístrate y participa</p>
 
+            <!-- Botones -->
             <div class="space-x-4">
                 <button id="btn-register" class="px-6 py-3 bg-orange-500 rounded-lg hover:bg-orange-600 transition font-semibold">
                     Registrarse
@@ -65,8 +72,7 @@
                 </button>
             </div>
         </div>
-    </div>
-
+    </div> 
     <!-- Form Section -->
     <section id="register-form" class="my-20 max-w-4xl mx-auto px-4">
         <h2 class="text-3xl md:text-4xl font-bold mb-2 text-orange-500">Regístrate Ahora</h2>
@@ -157,6 +163,20 @@
                 }
             });
         });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+
+    <!-- Inicialización Typed.js -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var typed = new Typed('#typed-text', {
+            strings: ["Aztlán 2025"],  // Texto que aparecerá
+            typeSpeed: 80,             // Velocidad de escritura
+            backSpeed: 0,              // No borra nada
+            showCursor: true,          // Mostrar cursor
+            loop: false
+        });
+    });
     </script>
 
 </body>
