@@ -13,7 +13,7 @@
 
         <div>
             <label class="block mb-1 font-medium text-gray-700">Fecha de Nacimiento:</label>
-            <input type="date" name="birth_date" class="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50" required>
+            <input id="birth_date" name="birth_date" placeholder="Selecciona tu fecha de nacimiento" class="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50" required>
         </div>
 
         <div>
@@ -52,3 +52,24 @@
         </div>
     </form>
 </div>
+
+<!-- CDN de Pikaday -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pikaday/css/pikaday.css">
+<script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+
+<script>
+  new Pikaday({
+      field: document.getElementById('birth_date'),
+      format: 'YYYY-MM-DD',
+      yearRange: [1950, new Date().getFullYear()],
+      maxDate: new Date(),
+      firstDay: 1,
+      i18n: {
+          previousMonth : 'Mes anterior',
+          nextMonth     : 'Mes siguiente',
+          months        : ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+          weekdays      : ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'],
+          weekdaysShort : ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
+      }
+  });
+</script>

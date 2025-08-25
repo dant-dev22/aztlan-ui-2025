@@ -6,27 +6,33 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         html { scroll-behavior: smooth; }
+
+        /* Fade-in animation */
+        .fade-in-on-scroll {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .fade-in-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-900">
 
     <!-- Navbar -->
-    <nav class="bg-black text-white fixed w-full z-50 transition-colors duration-300 ease-in-out">
+    <nav class="bg-black text-white fixed w-full z-50 transition-colors duration-300 ease-in-out fade-in-on-scroll">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
-          <!-- Logo -->
           <div class="flex-shrink-0">
             <a href="/" class="text-xl font-bold text-orange-500">Torneo BJJ</a>
           </div>
-
-          <!-- Desktop menu -->
           <div class="hidden md:flex flex-1 justify-center space-x-4">
             <a href="/" class="px-3 py-2 rounded-md hover:bg-gray-800">Inicio</a>
             <a href="#register-form" class="px-3 py-2 rounded-md hover:bg-gray-800">Registrarse</a>
             <a href="#continue-form" class="px-3 py-2 rounded-md hover:bg-gray-800">Terminar registro</a>
           </div>
-
-          <!-- Mobile menu button -->
           <div class="md:hidden">
             <button id="mobile-menu-button" class="focus:outline-none">
               <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -37,8 +43,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Mobile menu -->
       <div id="mobile-menu" class="hidden md:hidden bg-black">
         <a href="/" class="block px-4 py-2 hover:bg-gray-800">Inicio</a>
         <a href="#register-form" class="block px-4 py-2 hover:bg-gray-800">Registrarse</a>
@@ -47,23 +51,16 @@
     </nav>
 
     <!-- Hero Section -->
-    <div class="relative w-full h-screen bg-gray-800">
-        <!-- Imagen de fondo -->
+    <div class="relative w-full h-screen bg-gray-800 fade-in-on-scroll">
         <img src="https://cdn.evolve-university.com/wp-content/uploads/2022/08/5-techniques-in-mma-.jpeg" 
             alt="Hero Image" class="w-full h-full object-cover">
         <div class="absolute inset-0 bg-black bg-opacity-50"></div>
 
-        <!-- Contenido central -->
         <div class="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-4 space-y-6">
-            <!-- Título animado -->
-            <h1 id="typed-text" class="text-4xl md:text-6xl font-bold drop-shadow-lg text-white"
+            <h1 id="typed-text" class="text-4xl md:text-6xl font-bold drop-shadow-lg text-white fade-in-on-scroll"
                 style="font-family: 'Bebas Neue', sans-serif;"></h1>
-
-            <!-- Subtítulo -->
-            <p class="text-lg md:text-2xl drop-shadow-lg">Regístrate y participa</p>
-
-            <!-- Botones -->
-            <div class="space-x-4">
+            <p class="text-lg md:text-2xl drop-shadow-lg fade-in-on-scroll">Regístrate y participa</p>
+            <div class="space-x-4 fade-in-on-scroll">
                 <button id="btn-register" class="px-6 py-3 bg-orange-500 rounded-lg hover:bg-orange-600 transition font-semibold">
                     Registrarse
                 </button>
@@ -73,108 +70,92 @@
             </div>
         </div>
     </div> 
+
     <!-- Form Section -->
     <section id="register-form" class="my-20 max-w-4xl mx-auto px-4">
-        <h2 class="text-3xl md:text-4xl font-bold mb-2 text-orange-500">Regístrate Ahora</h2>
-        <div class="w-20 h-1 bg-orange-500 rounded mb-6"></div>
+        <h2 class="text-3xl md:text-4xl font-bold mb-2 text-orange-500 fade-in-on-scroll">Regístrate Ahora</h2>
+        <div class="w-20 h-1 bg-orange-500 rounded mb-6 fade-in-on-scroll"></div>
         {% include "register.html" %}
     </section>
 
     <section id="continue-form" class="my-20 max-w-4xl mx-auto px-4">
-        <h2 class="text-3xl md:text-4xl font-bold mb-2 text-orange-500">Subir comprobante</h2>
-        <div class="w-20 h-1 bg-orange-500 rounded mb-6"></div>
+        <h2 class="text-3xl md:text-4xl font-bold mb-2 text-orange-500 fade-in-on-scroll">Subir comprobante</h2>
+        <div class="w-20 h-1 bg-orange-500 rounded mb-6 fade-in-on-scroll"></div>
         {% include "upload.html" %}
     </section>
 
     <!-- Scripts -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const navEl = document.querySelector('nav');
-            const toBlack = () => {
-                navEl.classList.add('md:bg-black');
-                navEl.classList.remove('md:bg-transparent');
-            };
-            const toTransparent = () => {
-                navEl.classList.add('md:bg-transparent');
-                navEl.classList.remove('md:bg-black');
-            };
-
-            const btn = document.getElementById('btn-register');
-            const formSection = document.getElementById('register-form');
-            const continueSection = document.getElementById('continue-form');
-
-            // Botón del hero
-            btn.addEventListener('click', () => {
-                formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                toBlack();
-            });
-
-            const btnContinue = document.getElementById('btn-continue');
-
-            // Botón del hero - Continuar registro
-            btnContinue.addEventListener('click', () => {
-                continueSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                toBlack();
-            });
-
-            // Links del navbar
-            const navLinks = document.querySelectorAll('nav a');
-            navLinks.forEach(link => {
-                const href = link.getAttribute('href');
-
-                if (href === "/") {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                        toTransparent();
-                    });
-                } else if (href === "#register-form") {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        toBlack();
-                    });
-                } else if (href === "#continue-form") {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        continueSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        toBlack();
-                    });
-                } else {
-                    link.addEventListener('click', () => {
-                        toBlack();
-                    });
-                }
-            });
-
-            // Toggle mobile menu
-            const btnMobile = document.getElementById('mobile-menu-button');
-            const menuMobile = document.getElementById('mobile-menu');
-            btnMobile.addEventListener('click', () => {
-                menuMobile.classList.toggle('hidden');
-            });
-
-            // Cambio de color con scroll
-            window.addEventListener("scroll", () => {
-                if (window.scrollY > 50) {
-                    toBlack();
-                } else {
-                    toTransparent();
-                }
-            });
-        });
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
 
-    <!-- Inicialización Typed.js -->
     <script>
+    // Typed.js
     document.addEventListener("DOMContentLoaded", function() {
         var typed = new Typed('#typed-text', {
-            strings: ["Aztlán 2025"],  // Texto que aparecerá
-            typeSpeed: 80,             // Velocidad de escritura
-            backSpeed: 0,              // No borra nada
-            showCursor: true,          // Mostrar cursor
+            strings: ["Aztlán 2025"],
+            typeSpeed: 80,
+            backSpeed: 0,
+            showCursor: true,
+            cursorChar: '|',
             loop: false
+        });
+    });
+
+    // Navbar scroll + smooth scroll
+    document.addEventListener("DOMContentLoaded", function() {
+        const navEl = document.querySelector('nav');
+        const toBlack = () => {
+            navEl.classList.add('md:bg-black');
+            navEl.classList.remove('md:bg-transparent');
+        };
+        const toTransparent = () => {
+            navEl.classList.add('md:bg-transparent');
+            navEl.classList.remove('md:bg-black');
+        };
+
+        const btn = document.getElementById('btn-register');
+        const formSection = document.getElementById('register-form');
+        const continueSection = document.getElementById('continue-form');
+        const btnContinue = document.getElementById('btn-continue');
+
+        btn.addEventListener('click', () => { formSection.scrollIntoView({ behavior: 'smooth', block: 'start' }); toBlack(); });
+        btnContinue.addEventListener('click', () => { continueSection.scrollIntoView({ behavior: 'smooth', block: 'start' }); toBlack(); });
+
+        const navLinks = document.querySelectorAll('nav a');
+        navLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href === "/") {
+                link.addEventListener('click', (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); toTransparent(); });
+            } else if (href === "#register-form") {
+                link.addEventListener('click', (e) => { e.preventDefault(); formSection.scrollIntoView({ behavior: 'smooth', block: 'start' }); toBlack(); });
+            } else if (href === "#continue-form") {
+                link.addEventListener('click', (e) => { e.preventDefault(); continueSection.scrollIntoView({ behavior: 'smooth', block: 'start' }); toBlack(); });
+            } else {
+                link.addEventListener('click', () => { toBlack(); });
+            }
+        });
+
+        const btnMobile = document.getElementById('mobile-menu-button');
+        const menuMobile = document.getElementById('mobile-menu');
+        btnMobile.addEventListener('click', () => { menuMobile.classList.toggle('hidden'); });
+
+        window.addEventListener("scroll", () => {
+            if (window.scrollY > 50) { toBlack(); } else { toTransparent(); }
+        });
+    });
+
+    // Intersection Observer: fade-in on scroll
+    document.addEventListener("DOMContentLoaded", function() {
+        const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("visible");
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.fade-in-on-scroll').forEach(el => {
+            observer.observe(el);
         });
     });
     </script>
