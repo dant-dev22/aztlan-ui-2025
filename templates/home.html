@@ -8,22 +8,22 @@
         html { scroll-behavior: smooth; }
     </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-50 text-gray-900">
 
     <!-- Navbar -->
-    <nav class="bg-black md:bg-transparent text-white fixed w-full z-50 transition-colors duration-300 ease-in-out">
+    <nav class="bg-black text-white fixed w-full z-50 transition-colors duration-300 ease-in-out">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <!-- Logo -->
           <div class="flex-shrink-0">
-            <a href="/" class="text-xl font-bold">MiApp</a>
+            <a href="/" class="text-xl font-bold text-orange-500">Torneo BJJ</a>
           </div>
 
-          <!-- Desktop menu (centrado) -->
+          <!-- Desktop menu -->
           <div class="hidden md:flex flex-1 justify-center space-x-4">
-            <a href="/" class="px-3 py-2 rounded-md hover:bg-gray-700">Inicio</a>
-            <a href="#register-form" class="px-3 py-2 rounded-md hover:bg-gray-700">Registrarse</a>
-            <a href="#continue-form" class="px-3 py-2 rounded-md hover:bg-gray-700">Terminar registro</a>
+            <a href="/" class="px-3 py-2 rounded-md hover:bg-gray-800">Inicio</a>
+            <a href="#register-form" class="px-3 py-2 rounded-md hover:bg-gray-800">Registrarse</a>
+            <a href="#continue-form" class="px-3 py-2 rounded-md hover:bg-gray-800">Terminar registro</a>
           </div>
 
           <!-- Mobile menu button -->
@@ -50,29 +50,31 @@
     <div class="relative w-full h-screen bg-gray-800">
         <img src="https://cdn.evolve-university.com/wp-content/uploads/2022/08/5-techniques-in-mma-.jpeg" 
              alt="Hero Image" class="w-full h-full object-cover">
-        <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
 
         <div class="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-4 space-y-6">
             <h1 class="text-4xl md:text-6xl font-bold drop-shadow-lg">Bienvenido al Torneo</h1>
             <p class="text-lg md:text-2xl drop-shadow-lg">Regístrate y participa</p>
 
             <div class="space-x-4">
-                <button id="btn-register" class="px-6 py-3 bg-blue-600 rounded-lg hover:bg-blue-700 transition">
+                <button id="btn-register" class="px-6 py-3 bg-orange-500 rounded-lg hover:bg-orange-600 transition font-semibold">
                     Registrarse
                 </button>
-                <a  class="px-6 py-3 bg-green-600 rounded-lg hover:bg-green-700 transition">
+                <button id="btn-continue" class="px-6 py-3 bg-blue-600 rounded-lg hover:bg-blue-700 transition font-semibold">
                     Continuar registro
-                </a>
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Form Section -->
-    <section id="register-form" class="my-20">
+    <section id="register-form" class="my-20 max-w-4xl mx-auto px-4">
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">Formulario de Registro</h2>
         {% include "register.html" %}
     </section>
 
-    <section id="continue-form" class="my-20">
+    <section id="continue-form" class="my-20 max-w-4xl mx-auto px-4">
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">Subir comprobante</h2>
         {% include "upload.html" %}
     </section>
 
@@ -93,12 +95,16 @@
             const formSection = document.getElementById('register-form');
             const continueSection = document.getElementById('continue-form');
 
-            // Botón del hero -> scroll y navbar negro
+            // Botón del hero
             btn.addEventListener('click', () => {
                 formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 toBlack();
             });
-            btn.addEventListener('click', () => {
+
+            const btnContinue = document.getElementById('btn-continue');
+
+            // Botón del hero - Continuar registro
+            btnContinue.addEventListener('click', () => {
                 continueSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 toBlack();
             });

@@ -1,131 +1,30 @@
-<div class="max-w-xl mx-auto bg-white p-8 rounded shadow">
-    <h1 class="text-2xl font-bold mb-6">Subir Comprobante</h1>
+<div class="max-w-xl mx-auto bg-white p-8 rounded-xl shadow">
+    <h1 class="text-2xl font-bold mb-6 text-gray-800">Subir Comprobante</h1>
 
     <!-- Mensajes -->
-    <div id="upload-successMessage" class="hidden bg-green-100 text-green-800 p-4 mb-4 rounded"></div>
-    <div id="upload-errorMessage" class="hidden bg-red-100 text-red-800 p-4 mb-4 rounded"></div>
+    <div id="upload-successMessage" class="hidden bg-green-100 text-green-700 border border-green-300 p-4 mb-4 rounded-lg"></div>
+    <div id="upload-errorMessage" class="hidden bg-red-100 text-red-700 border border-red-300 p-4 mb-4 rounded-lg"></div>
 
     <!-- Formulario -->
     <form id="uploadForm" class="space-y-4">
         <div>
-            <label class="block mb-1 font-medium">Aztlan ID:</label>
-            <input type="text" id="aztlanId" class="w-full p-2 border rounded" placeholder="Ingresa Aztlan ID" required>
+            <label class="block mb-1 font-medium text-gray-700">Aztlan ID:</label>
+            <input type="text" id="aztlanId" class="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50" placeholder="Ingresa Aztlan ID" required>
         </div>
 
-        <div id="dropzone" class="w-full p-8 border-2 border-dashed border-gray-400 rounded text-center cursor-pointer hover:border-blue-500">
+        <div id="dropzone" class="w-full p-8 border-2 border-dashed border-gray-300 rounded-lg text-center cursor-pointer hover:border-orange-500 bg-gray-50 transition-colors">
             Arrastra tu archivo aquí o haz click en "Buscar archivo"
             <input type="file" id="fileInput" class="hidden" accept=".jpg,.jpeg,.png">
             <p id="fileName" class="mt-2 text-gray-700"></p>
         </div>
 
         <div class="flex space-x-2">
-            <button type="button" id="selectFileBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+            <button type="button" id="selectFileBtn" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition">
                 Buscar archivo
             </button>
-            <button type="button" id="uploadBtn" class="bg-gray-400 cursor-not-allowed text-white px-4 py-2 rounded" disabled>
+            <button type="button" id="uploadBtn" class="bg-gray-400 cursor-not-allowed text-white px-4 py-2 rounded-lg font-semibold" disabled>
                 Subir comprobante
             </button>
         </div>
     </form>
 </div>
-
-<script>
-const BASE_URL = "https://vjfpbq4jbiz5uyarfu7z7ahlhi0xbhmi.lambda-url.us-east-1.on.aws/";
-const dropzone = document.getElementById("dropzone");
-const fileInput = document.getElementById("fileInput");
-const selectFileBtn = document.getElementById("selectFileBtn");
-const uploadBtn = document.getElementById("uploadBtn");
-const fileName = document.getElementById("fileName");
-const uploadSuccessMessage = document.getElementById("upload-successMessage");
-const uploadErrorMessage = document.getElementById("upload-errorMessage");
-const aztlanIdInput = document.getElementById("aztlanId");
-
-let selectedFile = null;
-
-// Abrir selector al click
-selectFileBtn.addEventListener("click", () => fileInput.click());
-
-// Manejo de archivo seleccionado
-fileInput.addEventListener("change", (e) => {
-    selectedFile = e.target.files[0];
-    if (selectedFile) {
-        fileName.textContent = selectedFile.name;
-        uploadBtn.disabled = false;
-        uploadBtn.classList.remove("bg-gray-400", "cursor-not-allowed");
-        uploadBtn.classList.add("bg-green-600", "hover:bg-green-700");
-    }
-});
-
-// Drag & Drop
-dropzone.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    dropzone.classList.add("border-blue-500");
-});
-dropzone.addEventListener("dragleave", (e) => {
-    e.preventDefault();
-    dropzone.classList.remove("border-blue-500");
-});
-dropzone.addEventListener("drop", (e) => {
-    e.preventDefault();
-    dropzone.classList.remove("border-blue-500");
-    selectedFile = e.dataTransfer.files[0];
-    if (selectedFile) {
-        fileInput.files = e.dataTransfer.files;
-        fileName.textContent = selectedFile.name;
-        uploadBtn.disabled = false;
-        uploadBtn.classList.remove("bg-gray-400", "cursor-not-allowed");
-        uploadBtn.classList.add("bg-green-600", "hover:bg-green-700");
-    }
-});
-
-// Subir archivo
-uploadBtn.addEventListener("click", async () => {
-    const aztlanId = aztlanIdInput.value.trim();
-    if (!selectedFile) {
-        uploadErrorMessage.textContent = "Selecciona un archivo primero.";
-        uploadErrorMessage.classList.remove("hidden");
-        return;
-    }
-    if (!aztlanId) {
-        uploadErrorMessage.textContent = "Ingresa el Aztlan ID del participante.";
-        uploadErrorMessage.classList.remove("hidden");
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-
-    uploadBtn.disabled = true;
-    uploadBtn.textContent = "Subiendo...";
-
-    try {
-        const res = await fetch(`${BASE_URL}participants/${aztlanId}/payment-proof`, {
-            method: "POST",
-            body: formData
-        });
-
-        const result = await res.json();
-
-        if (!res.ok) {
-            uploadErrorMessage.textContent = result.detail || JSON.stringify(result);
-            uploadErrorMessage.classList.remove("hidden");
-        } else {
-            uploadSuccessMessage.textContent = result.message;
-            uploadSuccessMessage.classList.remove("hidden");
-            fileName.textContent = "";
-            selectedFile = null;
-            aztlanIdInput.value = "";
-            uploadBtn.textContent = "Subir comprobante";
-            uploadBtn.disabled = true;
-            uploadBtn.classList.remove("bg-green-600", "hover:bg-green-700");
-            uploadBtn.classList.add("bg-gray-400", "cursor-not-allowed");
-        }
-    } catch (err) {
-        console.error(err);
-        uploadErrorMessage.textContent = "Error al subir el comprobante.";
-        uploadErrorMessage.classList.remove("hidden");
-        uploadBtn.disabled = false;
-        uploadBtn.textContent = "Subir comprobante";
-    }
-});
-</script>
