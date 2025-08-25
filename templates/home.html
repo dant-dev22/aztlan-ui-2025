@@ -23,7 +23,7 @@
           <div class="hidden md:flex space-x-4">
             <a href="/" class="px-3 py-2 rounded-md hover:bg-gray-700">Inicio</a>
             <a href="#register-form" class="px-3 py-2 rounded-md hover:bg-gray-700">Registrarse</a>
-            <a href="/continue" class="px-3 py-2 rounded-md hover:bg-gray-700">Terminar registro</a>
+            <a href="#continue-form" class="px-3 py-2 rounded-md hover:bg-gray-700">Terminar registro</a>
           </div>
 
           <!-- Mobile menu button -->
@@ -42,7 +42,7 @@
       <div id="mobile-menu" class="hidden md:hidden bg-black">
         <a href="/" class="block px-4 py-2 hover:bg-gray-800">Inicio</a>
         <a href="#register-form" class="block px-4 py-2 hover:bg-gray-800">Registrarse</a>
-        <a href="/continue" class="block px-4 py-2 hover:bg-gray-800">Terminar registro</a>
+        <a href="#continue-form" class="block px-4 py-2 hover:bg-gray-800">Terminar registro</a>
       </div>
     </nav>
 
@@ -60,7 +60,7 @@
                 <button id="btn-register" class="px-6 py-3 bg-blue-600 rounded-lg hover:bg-blue-700 transition">
                     Registrarse
                 </button>
-                <a href="/continue" class="px-6 py-3 bg-green-600 rounded-lg hover:bg-green-700 transition">
+                <a  class="px-6 py-3 bg-green-600 rounded-lg hover:bg-green-700 transition">
                     Continuar registro
                 </a>
             </div>
@@ -70,6 +70,10 @@
     <!-- Form Section -->
     <section id="register-form" class="my-20">
         {% include "register.html" %}
+    </section>
+
+    <section id="continue-form" class="my-20">
+        {% include "upload.html" %}
     </section>
 
     <!-- Scripts -->
@@ -87,10 +91,15 @@
 
             const btn = document.getElementById('btn-register');
             const formSection = document.getElementById('register-form');
+            const continueSection = document.getElementById('continue-form');
 
             // Botón del hero -> scroll y navbar negro
             btn.addEventListener('click', () => {
                 formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                toBlack();
+            });
+            btn.addEventListener('click', () => {
+                continueSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 toBlack();
             });
 
@@ -113,7 +122,15 @@
                         formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         toBlack();
                     });
-                } else {
+                } else if (href === "#continue-form") {
+                    // Continue -> scroll y navbar negro
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        continueSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        toBlack();
+                    });
+                }
+                else {
                     // Cualquier otro (p. ej. /continue) -> navbar negro
                     link.addEventListener('click', () => {
                         toBlack();
