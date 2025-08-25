@@ -19,8 +19,8 @@
             <a href="/" class="text-xl font-bold">MiApp</a>
           </div>
 
-          <!-- Desktop menu -->
-          <div class="hidden md:flex space-x-4">
+          <!-- Desktop menu (centrado) -->
+          <div class="hidden md:flex flex-1 justify-center space-x-4">
             <a href="/" class="px-3 py-2 rounded-md hover:bg-gray-700">Inicio</a>
             <a href="#register-form" class="px-3 py-2 rounded-md hover:bg-gray-700">Registrarse</a>
             <a href="#continue-form" class="px-3 py-2 rounded-md hover:bg-gray-700">Terminar registro</a>
@@ -109,40 +109,44 @@
                 const href = link.getAttribute('href');
 
                 if (href === "/") {
-                    // Inicio -> scroll to top y navbar transparente
                     link.addEventListener('click', (e) => {
                         e.preventDefault();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                         toTransparent();
                     });
                 } else if (href === "#register-form") {
-                    // Registrarse -> scroll y navbar negro
                     link.addEventListener('click', (e) => {
                         e.preventDefault();
                         formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         toBlack();
                     });
                 } else if (href === "#continue-form") {
-                    // Continue -> scroll y navbar negro
                     link.addEventListener('click', (e) => {
                         e.preventDefault();
                         continueSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         toBlack();
                     });
-                }
-                else {
-                    // Cualquier otro (p. ej. /continue) -> navbar negro
+                } else {
                     link.addEventListener('click', () => {
                         toBlack();
                     });
                 }
             });
 
-            // Toggle mobile menu (sin afectar colores)
+            // Toggle mobile menu
             const btnMobile = document.getElementById('mobile-menu-button');
             const menuMobile = document.getElementById('mobile-menu');
             btnMobile.addEventListener('click', () => {
                 menuMobile.classList.toggle('hidden');
+            });
+
+            // Cambio de color con scroll
+            window.addEventListener("scroll", () => {
+                if (window.scrollY > 50) {
+                    toBlack();
+                } else {
+                    toTransparent();
+                }
             });
         });
     </script>
