@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin Dashboard</title>
-    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-8">
@@ -27,6 +26,7 @@
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha de Nacimiento</th>
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aztlan ID</th>
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peso (kg)</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                 </tr>
             </thead>
             <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
@@ -56,6 +56,7 @@ let participants = [];
 let currentPage = 1;
 const rowsPerPage = 10;
 
+// Renderizar tabla con columna Delete
 function renderTable(data) {
     tableBody.innerHTML = '';
     const start = (currentPage - 1) * rowsPerPage;
@@ -70,12 +71,39 @@ function renderTable(data) {
             <td class="px-4 py-2 whitespace-nowrap">${p.birth_date}</td>
             <td class="px-4 py-2 whitespace-nowrap">${p.aztlan_id}</td>
             <td class="px-4 py-2 whitespace-nowrap">${p.weight}</td>
+            <td class="px-4 py-2 whitespace-nowrap">
+                <button class="deleteBtn bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg" data-id="${p.aztlan_id}">Delete</button>
+            </td>
         `;
         tableBody.appendChild(row);
     }
 
     const totalPages = Math.ceil(data.length / rowsPerPage);
     pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
+
+    // Agregar eventos a botones Delete
+    document.querySelectorAll('.deleteBtn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const aztlanId = e.target.dataset.id;
+            if (!confirm(`¿Seguro que quieres eliminar el participante ${aztlanId}?`)) return;
+
+            try {
+                const res = await fetch(`https://vjfpbq4jbiz5uyarfu7z7ahlhi0xbhmi.lambda-url.us-east-1.on.aws/participants/${aztlanId}`, {
+                    method: 'DELETE'
+                });
+                if (!res.ok) throw new Error(`Error: ${res.statusText}`);
+                alert(`Participante ${aztlanId} eliminado correctamente.`);
+                
+                // Remover del array local y refrescar tabla
+                participants = participants.filter(p => p.aztlan_id !== aztlanId);
+                renderTable(participants.filter(p =>
+                    Object.values(p).some(v => String(v).toLowerCase().includes(searchInput.value.toLowerCase()))
+                ));
+            } catch (err) {
+                alert(`No se pudo eliminar: ${err.message}`);
+            }
+        });
+    });
 }
 
 function updateTable() {
@@ -113,7 +141,7 @@ async function loadParticipants() {
         participants = await res.json();
         renderTable(participants);
     } catch (err) {
-        tableBody.innerHTML = `<tr><td colspan="6" class="px-4 py-2 text-center text-red-500">No se pudieron cargar los participantes: ${err.message}</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="7" class="px-4 py-2 text-center text-red-500">No se pudieron cargar los participantes: ${err.message}</td></tr>`;
     }
 }
 
