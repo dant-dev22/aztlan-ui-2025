@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+
+<div class="max-w-7xl mx-auto bg-white p-6 rounded-xl shadow">
+    <h1 class="text-2xl font-bold mb-6">Participantes - Aztlan 2025 B</h1>
+
+    <!-- Buscador -->
+    <div class="mb-4">
+        <input type="text" id="searchInput" placeholder="Buscar participante..." class="w-full p-2 border border-gray-300 rounded-lg focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50">
+    </div>
+
+    <!-- Tabla -->
+    <div class="overflow-x-auto">
+        <table id="participantsTable" class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Academia</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cinturón</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha de Nacimiento</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aztlan ID</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peso (kg)</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
+                <!-- Se llenará dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="mt-4 flex justify-between items-center">
+        <button id="prevPage" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Anterior</button>
+        <span id="pageInfo" class="text-gray-700"></span>
+        <button id="nextPage" class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600">Siguiente</button>
+    </div>
+</div>
+
+<script>
+const API_URL = "https://vjfpbq4jbiz5uyarfu7z7ahlhi0xbhmi.lambda-url.us-east-1.on.aws/participants?torneo=aztlan-2025-b&limit=1000";
+
+const searchInput = document.getElementById('searchInput');
+const tableBody = document.getElementById('tableBody');
+const prevPage = document.getElementById('prevPage');
+const nextPage = document.getElementById('nextPage');
+const pageInfo = document.getElementById('pageInfo');
+
+let participants = [];
+let currentPage = 1;
+const rowsPerPage = 10;
+
+function renderTable(data) {
+    tableBody.innerHTML = '';
+    const start = (currentPage - 1) * rowsPerPage;
+    const pageData = data.slice(start, start + rowsPerPage);
+
+    for (const p of pageData) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="px-4 py-2 whitespace-nowrap">${p.name}</td>
+            <td class="px-4 py-2 whitespace-nowrap">${p.academy}</td>
+            <td class="px-4 py-2 whitespace-nowrap">${p.belt}</td>
+            <td class="px-4 py-2 whitespace-nowrap">${p.birth_date}</td>
+            <td class="px-4 py-2 whitespace-nowrap">${p.aztlan_id}</td>
+            <td class="px-4 py-2 whitespace-nowrap">${p.weight}</td>
+        `;
+        tableBody.appendChild(row);
+    }
+
+    const totalPages = Math.ceil(data.length / rowsPerPage);
+    pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
+}
+
+function updateTable() {
+    const filtered = participants.filter(p =>
+        Object.values(p).some(v => String(v).toLowerCase().includes(searchInput.value.toLowerCase()))
+    );
+    currentPage = 1;
+    renderTable(filtered);
+}
+
+searchInput.addEventListener('input', updateTable);
+
+prevPage.addEventListener('click', () => {
+    if (currentPage > 1) {
+        currentPage--;
+        updateTable();
+    }
+});
+
+nextPage.addEventListener('click', () => {
+    const filtered = participants.filter(p =>
+        Object.values(p).some(v => String(v).toLowerCase().includes(searchInput.value.toLowerCase()))
+    );
+    const totalPages = Math.ceil(filtered.length / rowsPerPage);
+    if (currentPage < totalPages) {
+        currentPage++;
+        renderTable(filtered);
+    }
+});
+
+async function loadParticipants() {
+    try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error(`Error al cargar: ${res.statusText}`);
+        participants = await res.json();
+        renderTable(participants);
+    } catch (err) {
+        tableBody.innerHTML = `<tr><td colspan="6" class="px-4 py-2 text-center text-red-500">No se pudieron cargar los participantes: ${err.message}</td></tr>`;
+    }
+}
+
+loadParticipants();
+</script>
+
+</body>
+</html>

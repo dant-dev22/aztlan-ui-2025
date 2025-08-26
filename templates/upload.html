@@ -11,13 +11,15 @@
             <input type="text" id="aztlanId" class="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50" placeholder="Ingresa Aztlan ID" required>
         </div>
 
-        <div id="dropzone" class="w-full p-8 border-2 border-dashed border-gray-300 rounded-lg text-center cursor-pointer hover:border-orange-500 bg-gray-50 transition-colors">
+        <!-- Dropzone solo en desktop -->
+        <div id="dropzone" class="hidden md:block w-full p-8 border-2 border-dashed border-gray-300 rounded-lg text-center cursor-pointer hover:border-orange-500 bg-gray-50 transition-colors">
             Arrastra tu archivo aquí o haz click en "Buscar archivo"
             <input type="file" id="fileInput" class="hidden" accept=".jpg,.jpeg,.png">
             <p id="fileName" class="mt-2 text-gray-700"></p>
         </div>
 
         <div class="flex space-x-2">
+            <!-- Botón siempre visible -->
             <button type="button" id="selectFileBtn" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition">
                 Buscar archivo
             </button>
@@ -27,3 +29,55 @@
         </div>
     </form>
 </div>
+
+<script>
+const fileInput = document.getElementById('fileInput');
+const selectFileBtn = document.getElementById('selectFileBtn');
+const fileName = document.getElementById('fileName');
+const uploadBtn = document.getElementById('uploadBtn');
+const dropzone = document.getElementById('dropzone');
+
+// Función para abrir el selector de archivos
+selectFileBtn.addEventListener('click', () => {
+    fileInput.click();
+});
+
+// Mostrar nombre del archivo y habilitar botón
+fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) {
+        fileName.textContent = fileInput.files[0].name;
+        uploadBtn.disabled = false;
+        uploadBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+        uploadBtn.classList.add('bg-orange-500', 'hover:bg-orange-600', 'cursor-pointer');
+    } else {
+        fileName.textContent = '';
+        uploadBtn.disabled = true;
+        uploadBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+        uploadBtn.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'cursor-pointer');
+    }
+});
+
+// Opcional: soporte drag & drop solo en desktop
+if (dropzone) {
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', e => {
+        e.preventDefault();
+        dropzone.classList.add('border-orange-500');
+    });
+    dropzone.addEventListener('dragleave', e => {
+        e.preventDefault();
+        dropzone.classList.remove('border-orange-500');
+    });
+    dropzone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropzone.classList.remove('border-orange-500');
+        if (e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            fileName.textContent = e.dataTransfer.files[0].name;
+            uploadBtn.disabled = false;
+            uploadBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+            uploadBtn.classList.add('bg-orange-500', 'hover:bg-orange-600', 'cursor-pointer');
+        }
+    });
+}
+</script>

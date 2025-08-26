@@ -88,8 +88,11 @@ async def submit_form(
         }
     )
 
-@app.get("/continue", response_class=HTMLResponse)
-async def continue_registration(request: Request):
-    return HTMLResponse(
-        "<h1 style='font-family: sans-serif; text-align: center; margin-top: 50px;'>Funcionalidad en construcción 🚧</h1>"
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_dashboard(request: Request):
+    return templates.TemplateResponse(
+        "admin.html",
+        {
+            "request": request
+        }
     )
