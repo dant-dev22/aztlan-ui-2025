@@ -53,8 +53,9 @@
                 if (!res.ok) {
                     errorMessage.textContent = result.detail?.message || JSON.stringify(result);
                     errorMessage.classList.remove('hidden');
-                } else {
-                    successMessage.textContent = result.message;
+                }else {
+                    successMessage.textContent = `🎉 Felicidades, haz iniciado tu registro con éxito! 
+                    Conserva tu Aztlán ID: ${result.aztlan_id} para terminar tu registro.`;
                     successMessage.classList.remove('hidden');
                     form.reset();
                 }
