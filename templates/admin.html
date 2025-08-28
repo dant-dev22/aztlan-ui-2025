@@ -7,8 +7,11 @@
 </head>
 <body class="bg-gray-100 p-8">
 
-<div class="max-w-7xl mx-auto bg-white p-6 rounded-xl shadow">
+<div class="max-w-7xl mx-auto bg-white p-6 rounded-xl shadow relative">
     <h1 class="text-2xl font-bold mb-6">Participantes - Aztlan 2025 B</h1>
+
+    <!-- Mensajes flotantes -->
+    <div id="toastContainer" class="fixed top-4 right-4 space-y-2 z-50"></div>
 
     <!-- Buscador -->
     <div class="mb-4">
@@ -26,6 +29,8 @@
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha de Nacimiento</th>
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aztlan ID</th>
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peso (kg)</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comprobante</th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aprobado</th>
                     <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                 </tr>
             </thead>
@@ -45,25 +50,77 @@
 
 <script>
 const API_URL = "https://vjfpbq4jbiz5uyarfu7z7ahlhi0xbhmi.lambda-url.us-east-1.on.aws/participants?torneo=aztlan-2025-b&limit=1000";
+const DELETE_URL_BASE = "https://vjfpbq4jbiz5uyarfu7z7ahlhi0xbhmi.lambda-url.us-east-1.on.aws/participants/";
+const PAYMENT_PROOF_URL_BASE = "https://vjfpbq4jbiz5uyarfu7z7ahlhi0xbhmi.lambda-url.us-east-1.on.aws/participants/";
+const UPDATE_PAYMENT_URL_BASE = "https://vjfpbq4jbiz5uyarfu7z7ahlhi0xbhmi.lambda-url.us-east-1.on.aws/participants/";
 
 const searchInput = document.getElementById('searchInput');
 const tableBody = document.getElementById('tableBody');
 const prevPage = document.getElementById('prevPage');
 const nextPage = document.getElementById('nextPage');
 const pageInfo = document.getElementById('pageInfo');
+const toastContainer = document.getElementById('toastContainer');
 
 let participants = [];
 let currentPage = 1;
 const rowsPerPage = 10;
 
-// Renderizar tabla con columna Delete
-function renderTable(data) {
+// Mostrar toast
+function showToast(message, type = "success") {
+    const toast = document.createElement('div');
+    toast.className = `px-4 py-2 rounded-lg text-white ${type === "success" ? "bg-green-500" : "bg-red-500"} shadow-lg animate-fadeIn`;
+    toast.textContent = message;
+    toastContainer.appendChild(toast);
+    setTimeout(() => {
+        toast.classList.add('opacity-0', 'transition', 'duration-500');
+        setTimeout(() => toast.remove(), 500);
+    }, 3000);
+}
+
+// Obtener URL del comprobante
+async function getPaymentProofUrl(aztlanId) {
+    try {
+        const res = await fetch(`${PAYMENT_PROOF_URL_BASE}${aztlanId}/payment-proof-url`);
+        if (res.status === 204) return null;
+        if (!res.ok) throw new Error(`Error: ${res.statusText}`);
+        const data = await res.json();
+        return data.payment_proof_url;
+    } catch (err) {
+        console.error(`No se pudo obtener comprobante para ${aztlanId}: ${err.message}`);
+        return null;
+    }
+}
+
+// Actualizar estado de pago
+async function togglePaymentStatus(aztlanId, currentStatus) {
+    if (!confirm("¿Estás seguro que quieres actualizar el estado del competidor?")) return currentStatus;
+
+    try {
+        const res = await fetch(`${UPDATE_PAYMENT_URL_BASE}${aztlanId}/payment`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_payment_complete: !currentStatus })
+        });
+        if (!res.ok) throw new Error(`Error: ${res.statusText}`);
+        const data = await res.json();
+        showToast(`Estado actualizado: ${data.is_payment_complete ? 'Aprobado' : 'No aprobado'}`, "success");
+        return data.is_payment_complete;
+    } catch (err) {
+        showToast(`No se pudo actualizar: ${err.message}`, "error");
+        return currentStatus;
+    }
+}
+
+// Renderizar tabla
+async function renderTable(data) {
     tableBody.innerHTML = '';
     const start = (currentPage - 1) * rowsPerPage;
     const pageData = data.slice(start, start + rowsPerPage);
 
     for (const p of pageData) {
+        const paymentProofUrl = await getPaymentProofUrl(p.aztlan_id);
         const row = document.createElement('tr');
+
         row.innerHTML = `
             <td class="px-4 py-2 whitespace-nowrap">${p.name}</td>
             <td class="px-4 py-2 whitespace-nowrap">${p.academy}</td>
@@ -72,38 +129,52 @@ function renderTable(data) {
             <td class="px-4 py-2 whitespace-nowrap">${p.aztlan_id}</td>
             <td class="px-4 py-2 whitespace-nowrap">${p.weight}</td>
             <td class="px-4 py-2 whitespace-nowrap">
+                ${paymentProofUrl ? `<a href="${paymentProofUrl}" target="_blank" class="text-blue-500 hover:underline">Comprobante de pago</a>` : 'Falta comprobante'}
+            </td>
+            <td class="px-4 py-2 whitespace-nowrap">
+                <label class="inline-flex relative items-center cursor-pointer">
+                    <input type="checkbox" class="sr-only approveSwitch" data-id="${p.aztlan_id}" ${p.is_payment_complete ? 'checked' : ''}>
+                    <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-800 peer-checked:bg-orange-500 transition-all"></div>
+                </label>
+            </td>
+            <td class="px-4 py-2 whitespace-nowrap">
                 <button class="deleteBtn bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg" data-id="${p.aztlan_id}">Delete</button>
             </td>
         `;
         tableBody.appendChild(row);
     }
 
-    const totalPages = Math.ceil(data.length / rowsPerPage);
-    pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
-
-    // Agregar eventos a botones Delete
+    // Eventos Delete
     document.querySelectorAll('.deleteBtn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             const aztlanId = e.target.dataset.id;
             if (!confirm(`¿Seguro que quieres eliminar el participante ${aztlanId}?`)) return;
-
             try {
-                const res = await fetch(`https://vjfpbq4jbiz5uyarfu7z7ahlhi0xbhmi.lambda-url.us-east-1.on.aws/participants/${aztlanId}`, {
-                    method: 'DELETE'
-                });
+                const res = await fetch(`${DELETE_URL_BASE}${aztlanId}`, { method: 'DELETE' });
                 if (!res.ok) throw new Error(`Error: ${res.statusText}`);
-                alert(`Participante ${aztlanId} eliminado correctamente.`);
-                
-                // Remover del array local y refrescar tabla
+                showToast(`Participante ${aztlanId} eliminado correctamente.`, "success");
                 participants = participants.filter(p => p.aztlan_id !== aztlanId);
                 renderTable(participants.filter(p =>
                     Object.values(p).some(v => String(v).toLowerCase().includes(searchInput.value.toLowerCase()))
                 ));
             } catch (err) {
-                alert(`No se pudo eliminar: ${err.message}`);
+                showToast(`No se pudo eliminar: ${err.message}`, "error");
             }
         });
     });
+
+    // Eventos Switch Aprobado
+    document.querySelectorAll('.approveSwitch').forEach(async switchEl => {
+        switchEl.addEventListener('change', async (e) => {
+            const aztlanId = e.target.dataset.id;
+            const currentStatus = e.target.checked;
+            const updatedStatus = await togglePaymentStatus(aztlanId, !currentStatus);
+            e.target.checked = updatedStatus;
+        });
+    });
+
+    const totalPages = Math.ceil(data.length / rowsPerPage);
+    pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
 }
 
 function updateTable() {
@@ -141,7 +212,7 @@ async function loadParticipants() {
         participants = await res.json();
         renderTable(participants);
     } catch (err) {
-        tableBody.innerHTML = `<tr><td colspan="7" class="px-4 py-2 text-center text-red-500">No se pudieron cargar los participantes: ${err.message}</td></tr>`;
+        tableBody.innerHTML = `<tr><td colspan="9" class="px-4 py-2 text-center text-red-500">No se pudieron cargar los participantes: ${err.message}</td></tr>`;
     }
 }
 

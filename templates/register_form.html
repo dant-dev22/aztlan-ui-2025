@@ -56,20 +56,3 @@
 <!-- CDN de Pikaday -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pikaday/css/pikaday.css">
 <script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
-
-<script>
-  new Pikaday({
-      field: document.getElementById('birth_date'),
-      format: 'YYYY-MM-DD',
-      yearRange: [1950, new Date().getFullYear()],
-      maxDate: new Date(),
-      firstDay: 1,
-      i18n: {
-          previousMonth : 'Mes anterior',
-          nextMonth     : 'Mes siguiente',
-          months        : ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
-          weekdays      : ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'],
-          weekdaysShort : ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
-      }
-  });
-</script>

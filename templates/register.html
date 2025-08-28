@@ -17,7 +17,6 @@
         <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24"></div>
     </div>
 
-    <!-- Script de registro -->
     <script>
         const form = document.getElementById('registerForm');
         const loading = document.getElementById('loading');
@@ -30,13 +29,13 @@
             successMessage.classList.add('hidden');
             errorMessage.classList.add('hidden');
 
+            console.log(form, "soy el form 32")
             const data = {
                 name: form.name.value,
                 birth_date: form.birth_date.value,
                 weight: parseFloat(form.weight.value),
                 height: parseFloat(form.height.value),
                 academy: form.academy.value,
-                category: form.category.value,
                 email: form.email.value,
                 belt: form.belt.value || "white",
                 torneo: form.torneo.value,
@@ -76,6 +75,7 @@
         const beltsKids = ["Blanco", "Gris", "Amarillo", "Naranja", "Verde"];
         const beltsAdults = ["Blanco", "Azul", "Morado", "Cafe", "Negro"];
 
+        // Función para calcular edad
         function calculateAge(date) {
             const today = new Date();
             const birthDate = new Date(date);
@@ -85,11 +85,11 @@
             return age;
         }
 
+        // Función para actualizar cinturones según edad
         function updateBelts() {
             const birthDate = birthDateInput.value;
 
             if (!birthDate) {
-                // Ocultar cinturón si no hay fecha
                 beltDiv.style.display = "none";
                 beltSelect.innerHTML = "";
                 return;
@@ -98,7 +98,6 @@
             const age = calculateAge(birthDate);
             const options = age <= 15 ? beltsKids : beltsAdults;
 
-            // Mostrar el div y llenar opciones
             beltDiv.style.display = "block";
             beltSelect.innerHTML = "";
             options.forEach(belt => {
@@ -108,24 +107,40 @@
                 beltSelect.appendChild(option);
             });
 
-            beltSelect.value = "blanca";
+            beltSelect.value = options[0].toLowerCase();
         }
 
         // Inicializar oculto
         beltDiv.style.display = "none";
 
-        // Escuchar cambios en la fecha de nacimiento
+        // Escuchar cambios manuales en el input
         birthDateInput.addEventListener("change", updateBelts);
+
+        // Inicializar Pikaday
+        const picker = new Pikaday({
+            field: birthDateInput,
+            format: 'YYYY-MM-DD',
+            yearRange: [1950, new Date().getFullYear()],
+            maxDate: new Date(),
+            firstDay: 1,
+            i18n: {
+                previousMonth : 'Mes anterior',
+                nextMonth     : 'Mes siguiente',
+                months        : ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+                weekdays      : ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'],
+                weekdaysShort : ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
+            },
+            onSelect: function(date) {
+                // Formatear automáticamente en YYYY-MM-DD
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                birthDateInput.value = `${year}-${month}-${day}`;
+
+                // Disparar actualización de cinturones
+                updateBelts();
+            }
+        });
     </script>
-    <style>
-        .loader {
-            border-top-color: #1DB954;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
-</body>
+    </body>
 </html>
