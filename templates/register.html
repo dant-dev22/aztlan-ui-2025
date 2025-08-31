@@ -17,19 +17,35 @@
         <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24"></div>
     </div>
 
+    <!-- Modal de éxito -->
+    <div id="successModal" 
+         class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center transform scale-90 transition-transform duration-300">
+            <h2 class="text-2xl font-bold text-green-600 mb-4">✅ Registro Exitoso</h2>
+            <p class="text-gray-700 mb-2">🎉 Haz iniciado tu registro con éxito!</p>
+            <p class="text-gray-800 font-semibold mb-6">
+                Conserva tu Aztlán ID <span class="text-green-600" id="aztlanID"></span> para terminar tu registro.
+            </p>
+            <button id="closeModalBtn" 
+                    class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                Cerrar
+            </button>
+        </div>
+    </div>
+
     <script>
         const form = document.getElementById('registerForm');
         const loading = document.getElementById('loading');
-        const successMessage = document.getElementById('successMessage');
         const errorMessage = document.getElementById('errorMessage');
+        const successModal = document.getElementById('successModal');
+        const aztlanIDSpan = document.getElementById('aztlanID');
+        const closeModalBtn = document.getElementById('closeModalBtn');
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             loading.classList.remove('hidden');
-            successMessage.classList.add('hidden');
             errorMessage.classList.add('hidden');
 
-            console.log(form, "soy el form 32")
             const data = {
                 name: form.name.value,
                 birth_date: form.birth_date.value,
@@ -53,10 +69,10 @@
                 if (!res.ok) {
                     errorMessage.textContent = result.detail?.message || JSON.stringify(result);
                     errorMessage.classList.remove('hidden');
-                }else {
-                    successMessage.textContent = `🎉 Felicidades, haz iniciado tu registro con éxito! 
-                    Conserva tu Aztlán ID: ${result.aztlan_id} para terminar tu registro.`;
-                    successMessage.classList.remove('hidden');
+                } else {
+                    // Mostrar modal de éxito con Aztlán ID
+                    aztlanIDSpan.textContent = result.aztlan_id;
+                    successModal.classList.remove('hidden');
                     form.reset();
                 }
             } catch (err) {
@@ -67,16 +83,21 @@
                 loading.classList.add('hidden');
             }
         });
+
+        // Botón para cerrar modal
+        closeModalBtn.addEventListener('click', () => {
+            successModal.classList.add('hidden');
+        });
     </script>
+
     <script>
         const birthDateInput = document.querySelector('input[name="birth_date"]');
-        const beltDiv = document.querySelector('select[name="belt"]').parentElement; // contenedor del select
+        const beltDiv = document.querySelector('select[name="belt"]').parentElement;
         const beltSelect = document.querySelector('select[name="belt"]');
 
         const beltsKids = ["Blanco", "Gris", "Amarillo", "Naranja", "Verde"];
         const beltsAdults = ["Blanco", "Azul", "Morado", "Cafe", "Negro"];
 
-        // Función para calcular edad
         function calculateAge(date) {
             const today = new Date();
             const birthDate = new Date(date);
@@ -86,10 +107,8 @@
             return age;
         }
 
-        // Función para actualizar cinturones según edad
         function updateBelts() {
             const birthDate = birthDateInput.value;
-
             if (!birthDate) {
                 beltDiv.style.display = "none";
                 beltSelect.innerHTML = "";
@@ -111,13 +130,9 @@
             beltSelect.value = options[0].toLowerCase();
         }
 
-        // Inicializar oculto
         beltDiv.style.display = "none";
-
-        // Escuchar cambios manuales en el input
         birthDateInput.addEventListener("change", updateBelts);
 
-        // Inicializar Pikaday
         const picker = new Pikaday({
             field: birthDateInput,
             format: 'YYYY-MM-DD',
@@ -132,16 +147,13 @@
                 weekdaysShort : ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
             },
             onSelect: function(date) {
-                // Formatear automáticamente en YYYY-MM-DD
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const day = String(date.getDate()).padStart(2, '0');
                 birthDateInput.value = `${year}-${month}-${day}`;
-
-                // Disparar actualización de cinturones
                 updateBelts();
             }
         });
     </script>
-    </body>
+</body>
 </html>
