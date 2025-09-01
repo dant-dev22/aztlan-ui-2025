@@ -1,0 +1,29 @@
+    <!-- Footer -->
+    <footer class="bg-black text-white py-6 mt-20">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
+
+            <!-- Social Icons -->
+            <div class="flex space-x-4">
+                <a href="https://www.instagram.com/" target="_blank" class="hover:opacity-70 transition">
+                    <div class="bg-white rounded-full p-1 flex items-center justify-center">
+                        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram" class="h-6 w-6">
+                    </div>
+                </a>
+                <a href="https://www.facebook.com/share/1YKzJGxWRF/" target="_blank" class="hover:opacity-70 transition">
+                    <div class="bg-white rounded-full p-1 flex items-center justify-center">
+                        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg" alt="Facebook" class="h-6 w-6">
+                    </div>
+                </a>
+            </div>
+
+            <!-- Rights / Date -->
+            <div class="text-sm text-gray-400">
+                &copy; <span id="current-year"></span> Aztlan 2025. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Insertar el año actual automáticamente
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
