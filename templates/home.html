@@ -26,7 +26,9 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <div class="flex-shrink-0">
-            <a href="/" class="text-xl font-bold text-orange-500">Torneo BJJ</a>
+            <a href="/">
+                <img src="https://aztlang-grappling-images.s3.us-east-1.amazonaws.com/assets/Logoaztlan_VECTORES.png" alt="Torneo BJJ Logo" class="h-28 w-auto filter invert">
+            </a>
           </div>
           <div class="hidden md:flex flex-1 justify-center space-x-4">
             <a href="/" class="px-3 py-2 rounded-md hover:bg-gray-800">Inicio</a>
@@ -52,14 +54,13 @@
 
     <!-- Hero Section -->
     <div class="relative w-full h-screen bg-gray-800 fade-in-on-scroll">
-        <img src="https://cdn.evolve-university.com/wp-content/uploads/2022/08/5-techniques-in-mma-.jpeg" 
+        <img src="https://aztlang-grappling-images.s3.us-east-1.amazonaws.com/assets/bg-image-aztlan.jpeg" 
             alt="Hero Image" class="w-full h-full object-cover">
         <div class="absolute inset-0 bg-black bg-opacity-50"></div>
 
         <div class="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-4 space-y-6">
             <h1 id="typed-text" class="text-4xl md:text-6xl font-bold drop-shadow-lg text-white fade-in-on-scroll"
                 style="font-family: 'Bebas Neue', sans-serif;"></h1>
-            <p class="text-lg md:text-2xl drop-shadow-lg fade-in-on-scroll">Regístrate y participa</p>
             <div class="space-x-4 fade-in-on-scroll">
                 <button id="btn-register" class="px-6 py-3 bg-orange-500 rounded-lg hover:bg-orange-600 transition font-semibold">
                     Registrarse
@@ -91,12 +92,12 @@
     // Typed.js
     document.addEventListener("DOMContentLoaded", function() {
         var typed = new Typed('#typed-text', {
-            strings: ["Aztlán 2025"],
-            typeSpeed: 80,
+            strings: ["Aztlán 2025", "Regístrate y Participa"],
+            typeSpeed: 160,
             backSpeed: 0,
-            showCursor: true,
+            showCursor: false,
             cursorChar: '|',
-            loop: false
+            loop: true 
         });
     });
 
