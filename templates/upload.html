@@ -29,55 +29,103 @@
         </div>
     </form>
 </div>
-
 <script>
-const fileInput = document.getElementById('fileInput');
-const selectFileBtn = document.getElementById('selectFileBtn');
-const fileName = document.getElementById('fileName');
-const uploadBtn = document.getElementById('uploadBtn');
-const dropzone = document.getElementById('dropzone');
-
-// Función para abrir el selector de archivos
-selectFileBtn.addEventListener('click', () => {
-    fileInput.click();
-});
-
-// Mostrar nombre del archivo y habilitar botón
-fileInput.addEventListener('change', () => {
-    if (fileInput.files.length > 0) {
-        fileName.textContent = fileInput.files[0].name;
-        uploadBtn.disabled = false;
-        uploadBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
-        uploadBtn.classList.add('bg-orange-500', 'hover:bg-orange-600', 'cursor-pointer');
-    } else {
-        fileName.textContent = '';
-        uploadBtn.disabled = true;
-        uploadBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
-        uploadBtn.classList.remove('bg-orange-500', 'hover:bg-orange-600', 'cursor-pointer');
-    }
-});
-
-// Opcional: soporte drag & drop solo en desktop
-if (dropzone) {
-    dropzone.addEventListener('click', () => fileInput.click());
-    dropzone.addEventListener('dragover', e => {
-        e.preventDefault();
-        dropzone.classList.add('border-orange-500');
-    });
-    dropzone.addEventListener('dragleave', e => {
-        e.preventDefault();
-        dropzone.classList.remove('border-orange-500');
-    });
-    dropzone.addEventListener('drop', e => {
-        e.preventDefault();
-        dropzone.classList.remove('border-orange-500');
-        if (e.dataTransfer.files.length > 0) {
-            fileInput.files = e.dataTransfer.files;
-            fileName.textContent = e.dataTransfer.files[0].name;
+    const BASE_URL = "https://vjfpbq4jbiz5uyarfu7z7ahlhi0xbhmi.lambda-url.us-east-1.on.aws/";
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("fileInput");
+    const selectFileBtn = document.getElementById("selectFileBtn");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const fileName = document.getElementById("fileName");
+    const uploadSuccessMessage = document.getElementById("upload-successMessage");
+    const uploadErrorMessage = document.getElementById("upload-errorMessage");
+    const aztlanIdInput = document.getElementById("aztlanId");
+    
+    let selectedFile = null;
+    
+    // Abrir selector al click
+    selectFileBtn.addEventListener("click", () => fileInput.click());
+    
+    // Manejo de archivo seleccionado
+    fileInput.addEventListener("change", (e) => {
+        selectedFile = e.target.files[0];
+        if (selectedFile) {
+            fileName.textContent = selectedFile.name;
             uploadBtn.disabled = false;
-            uploadBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
-            uploadBtn.classList.add('bg-orange-500', 'hover:bg-orange-600', 'cursor-pointer');
+            uploadBtn.classList.remove("bg-gray-400", "cursor-not-allowed");
+            uploadBtn.classList.add("bg-blue-600", "hover:bg-blue-700");
         }
     });
-}
+    
+    // Drag & Drop
+    dropzone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropzone.classList.add("border-blue-500");
+    });
+    dropzone.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        dropzone.classList.remove("border-blue-500");
+    });
+    dropzone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropzone.classList.remove("border-blue-500");
+        selectedFile = e.dataTransfer.files[0];
+        if (selectedFile) {
+            fileInput.files = e.dataTransfer.files;
+            fileName.textContent = selectedFile.name;
+            uploadBtn.disabled = false;
+            uploadBtn.classList.remove("bg-gray-400", "cursor-not-allowed");
+            uploadBtn.classList.add("bg-green-600", "hover:bg-green-700");
+        }
+    });
+    
+    // Subir archivo
+    uploadBtn.addEventListener("click", async () => {
+        const aztlanId = aztlanIdInput.value.trim();
+        if (!selectedFile) {
+            uploadErrorMessage.textContent = "Selecciona un archivo primero.";
+            uploadErrorMessage.classList.remove("hidden");
+            return;
+        }
+        if (!aztlanId) {
+            uploadErrorMessage.textContent = "Ingresa el Aztlan ID del participante.";
+            uploadErrorMessage.classList.remove("hidden");
+            return;
+        }
+    
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+    
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = "Subiendo...";
+    
+        try {
+            const res = await fetch(`${BASE_URL}participants/${aztlanId}/payment-proof`, {
+                method: "POST",
+                body: formData
+            });
+    
+            const result = await res.json();
+    
+            if (!res.ok) {
+                uploadErrorMessage.textContent = result.detail || JSON.stringify(result);
+                uploadErrorMessage.classList.remove("hidden");
+            } else {
+                uploadSuccessMessage.textContent = result.message;
+                uploadSuccessMessage.classList.remove("hidden");
+                fileName.textContent = "";
+                selectedFile = null;
+                aztlanIdInput.value = "";
+                uploadBtn.textContent = "Subir comprobante";
+                uploadBtn.disabled = true;
+                uploadBtn.classList.remove("bg-blue-600", "hover:bg-blue-700");
+                uploadBtn.classList.add("bg-gray-400", "cursor-not-allowed");
+            }
+        } catch (err) {
+            console.error(err);
+            uploadErrorMessage.textContent = "Error al subir el comprobante.";
+            uploadErrorMessage.classList.remove("hidden");
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = "Subir comprobante";
+        }
+    });
 </script>
