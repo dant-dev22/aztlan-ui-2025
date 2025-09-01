@@ -6,7 +6,6 @@ class ParticipantForm(BaseModel):
     birth_date: date
     weight: float
     academy: str
-    height: float
     category: str
     email: str
     belt: str | None = "white"
