@@ -46,6 +46,11 @@
             loading.classList.remove('hidden');
             errorMessage.classList.add('hidden');
 
+            // 🔹 Calcular experiencia en meses
+            const years = parseInt(form.years.value) || 0;
+            const months = parseInt(form.months.value) || 0;
+            const totalMonths = (years * 12) + months;
+
             const data = {
                 name: form.name.value,
                 birth_date: form.birth_date.value,
@@ -54,7 +59,8 @@
                 email: form.email.value,
                 belt: form.belt.value || "white",
                 torneo: form.torneo.value,
-                payment_proof: null
+                payment_proof: null,
+                experience: totalMonths 
             };
 
             try {

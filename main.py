@@ -40,7 +40,7 @@ async def submit_form(
     birth_date: str = Form(...),
     weight: float = Form(...),
     academy: str = Form(...),
-    category: str = Form(...),
+    experience: int = Form(...),
     email: str = Form(...),
     belt: str | None = Form("white"),
     torneo: str = Form(...),
@@ -50,7 +50,7 @@ async def submit_form(
         "birth_date": birth_date,
         "weight": weight,
         "academy": academy,
-        "category": category,
+        "experience": experience,
         "email": email,
         "belt": belt,
         "torneo": torneo
