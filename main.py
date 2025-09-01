@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from mangum import Mangum
+from email_sender import send_email
 import httpx
 
 app = FastAPI()
@@ -64,7 +65,14 @@ async def submit_form(
             response = await client.post(API_URL, json=payload)
             response.raise_for_status()
             data = response.json()
-            message = f"Participant registered! ID: {data.get('aztlan_id', 'N/A')}"
+
+            aztlan_id = data.get("aztlan_id", "N/A")
+            message = f"Participant registered! ID: {aztlan_id}"
+
+            try:
+                send_email(aztlan_id, email)
+            except Exception as e:
+                errors["email"] = f"No se pudo enviar el correo: {e}"
 
     except httpx.HTTPStatusError as exc:
         detail = exc.response.json().get("detail", {})
