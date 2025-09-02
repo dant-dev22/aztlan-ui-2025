@@ -32,6 +32,7 @@
                     <th class="border border-gray-300 px-3 py-2">Peso</th>
                     <th class="border border-gray-300 px-3 py-2">Comprobante de Pago</th>
                     <th class="border border-gray-300 px-3 py-2">Actualizar Estado</th>
+                    <th class="border border-gray-300 px-3 py-2">Eliminar</th>
                 </tr>
             </thead>
             <tbody id="participantsTableBody">
@@ -62,7 +63,7 @@
             const participants = await response.json();
 
             if (participants.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="11" class="text-center p-4">No hay participantes</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="12" class="text-center p-4">No hay participantes</td></tr>`;
             } else {
                 for (const p of participants) {
                     const tr = document.createElement('tr');
@@ -87,16 +88,16 @@
                                 <span class="ml-2">${isPaymentComplete ? 'Completo' : 'Pendiente'}</span>
                             </label>
                         </td>
+                        <td class="border border-gray-300 px-3 py-2 text-center">
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn">Eliminar</button>
+                        </td>
                     `;
                     tableBody.appendChild(tr);
 
                     // Comprobante de pago
                     const paymentCell = tr.querySelector('.payment-cell');
                     fetch(`${baseUrl}/participants/${p.aztlan_id}/payment-proof-url`)
-                        .then(res => {
-                            if (res.ok && res.status !== 204) return res.json();
-                            else return null;
-                        })
+                        .then(res => (res.ok && res.status !== 204) ? res.json() : null)
                         .then(data => {
                             if (data && data.payment_proof_url) {
                                 paymentCell.innerHTML = `<a href="${data.payment_proof_url}" target="_blank" class="text-blue-600 underline">Ver</a>`;
@@ -106,11 +107,13 @@
                         })
                         .catch(() => { paymentCell.textContent = 'Error'; });
 
-                    // Switch de actualización
+                    // Switch de actualización de pago
                     const switchInput = tr.querySelector('.payment-switch');
                     switchInput.addEventListener('click', async (e) => {
                         e.preventDefault();
                         const confirmUpdate = confirm('¿Estás seguro que quieres actualizar?');
+                        if (!confirmUpdate) return;
+
                         const newStatus = switchInput.checked;
                         try {
                             const resp = await fetch(`${baseUrl}/participants/${p.aztlan_id}/payment`, {
@@ -124,10 +127,26 @@
                             alert('Estado actualizado correctamente');
                         } catch (err) {
                             alert(err.message);
-                            // Revertir switch en caso de error
                             switchInput.checked = !switchInput.checked;
                         }
                     });
+
+                    // Botón eliminar participante
+                    const deleteBtn = tr.querySelector('.delete-btn');
+                    deleteBtn.addEventListener('click', async () => {
+                        const confirmDelete = confirm(`¿Deseas eliminar al participante ${p.name}?`);
+                        if (!confirmDelete) return;
+
+                        try {
+                            const resp = await fetch(`${baseUrl}/participants/${p.aztlan_id}`, { method: 'DELETE' });
+                            if (!resp.ok) throw new Error('Error eliminando participante');
+                            const result = await resp.json();
+                            alert(result.message);
+                            location.reload(); // <-- recarga la página completa
+                        } catch (err) {
+                            alert(err.message);
+                        }
+                    }); 
                 }
             }
 
