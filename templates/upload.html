@@ -52,7 +52,7 @@
             fileName.textContent = selectedFile.name;
             uploadBtn.disabled = false;
             uploadBtn.classList.remove("bg-gray-400", "cursor-not-allowed");
-            uploadBtn.classList.add("bg-blue-600", "hover:bg-blue-700");
+            uploadBtn.classList.add("bg-green-600", "hover:bg-green-700");
         }
     });
     
@@ -117,7 +117,7 @@
                 aztlanIdInput.value = "";
                 uploadBtn.textContent = "Subir comprobante";
                 uploadBtn.disabled = true;
-                uploadBtn.classList.remove("bg-blue-600", "hover:bg-blue-700");
+                uploadBtn.classList.remove("bg-green-600", "hover:bg-green-700");
                 uploadBtn.classList.add("bg-gray-400", "cursor-not-allowed");
             }
         } catch (err) {

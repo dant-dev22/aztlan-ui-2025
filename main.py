@@ -69,11 +69,6 @@ async def submit_form(
             aztlan_id = data.get("aztlan_id", "N/A")
             message = f"Participant registered! ID: {aztlan_id}"
 
-            try:
-                send_email(aztlan_id, email)
-            except Exception as e:
-                errors["email"] = f"No se pudo enviar el correo: {e}"
-
     except httpx.HTTPStatusError as exc:
         detail = exc.response.json().get("detail", {})
         if isinstance(detail, dict) and "field" in detail and "message" in detail:
