@@ -10,9 +10,14 @@
 <div class="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow">
     <h1 class="text-2xl font-bold mb-4">Dashboard de Participantes</h1>
 
-    <button id="fetchParticipantsBtn" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition mb-4">
-        Obtener Participantes
-    </button>
+    <div class="flex gap-4 mb-4">
+        <button id="fetchParticipantsBtn" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition">
+            Obtener Participantes
+        </button>
+        <button id="generateCSVBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition">
+            Generar lista de participants 
+        </button>
+    </div>
 
     <div id="loading" class="hidden text-gray-700 mb-4">Cargando participantes...</div>
     <div id="errorMessage" class="hidden text-red-600 mb-4"></div>
@@ -42,121 +47,189 @@
     </div>
 </div>
 
+<!-- Modal CSV -->
+<div id="csvModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white p-6 rounded-xl shadow-lg w-96 relative">
+        <h2 class="text-xl font-bold mb-4">Selecciona el filtro</h2>
+        <label class="block mb-2 font-semibold">Filtrar por cinturón:</label>
+        <select id="beltFilter" class="w-full border border-gray-300 rounded p-2 mb-4">
+            <option value="all">Todos</option>
+            <option value="Blanco">Blanco</option>
+            <option value="Gris">Gris</option>
+            <option value="Amarillo">Amarillo</option>
+            <option value="Naranja">Naranja</option>
+            <option value="Verde">Verde</option>
+            <option value="Azul">Azul</option>
+            <option value="Morado">Morado</option>
+            <option value="Marrón">Marrón</option>
+            <option value="Negro">Negro</option>
+        </select>
+        <div class="flex justify-end gap-2">
+            <button id="cancelCSV" class="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded">Cancelar</button>
+            <button id="downloadCSV" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Generar</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    const fetchBtn = document.getElementById('fetchParticipantsBtn');
-    const tableBody = document.getElementById('participantsTableBody');
-    const loading = document.getElementById('loading');
-    const errorMessage = document.getElementById('errorMessage');
+const fetchBtn = document.getElementById('fetchParticipantsBtn');
+const tableBody = document.getElementById('participantsTableBody');
+const loading = document.getElementById('loading');
+const errorMessage = document.getElementById('errorMessage');
 
-    const baseUrl = 'https://vjfpbq4jbiz5uyarfu7z7ahlhi0xbhmi.lambda-url.us-east-1.on.aws';
+const generateCSVBtn = document.getElementById('generateCSVBtn');
+const csvModal = document.getElementById('csvModal');
+const cancelCSV = document.getElementById('cancelCSV');
+const downloadCSV = document.getElementById('downloadCSV');
+const beltFilter = document.getElementById('beltFilter');
 
-    fetchBtn.addEventListener('click', async () => {
-        loading.classList.remove('hidden');
-        errorMessage.classList.add('hidden');
-        tableBody.innerHTML = '';
+const baseUrl = 'https://vjfpbq4jbiz5uyarfu7z7ahlhi0xbhmi.lambda-url.us-east-1.on.aws';
+let participantsData = [];
 
-        try {
-            const response = await fetch(`${baseUrl}/participants?torneo=aztlan-2025-b&limit=100`);
-            if (!response.ok) {
-                throw new Error(`Error al obtener participantes: ${response.statusText}`);
+// Fetch participantes
+fetchBtn.addEventListener('click', async () => {
+    loading.classList.remove('hidden');
+    errorMessage.classList.add('hidden');
+    tableBody.innerHTML = '';
+    participantsData = [];
+
+    try {
+        const response = await fetch(`${baseUrl}/participants?torneo=aztlan-2025-b&limit=100`);
+        if (!response.ok) throw new Error(`Error al obtener participantes: ${response.statusText}`);
+        const participants = await response.json();
+        participantsData = participants;
+
+        if (participants.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="12" class="text-center p-4">No hay participantes</td></tr>`;
+        } else {
+            for (const p of participants) {
+                const tr = document.createElement('tr');
+
+                const spinner = `<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900 mx-auto"></div>`;
+                const isPaymentComplete = p.is_payment_complete || false;
+
+                tr.innerHTML = `
+                    <td class="border border-gray-300 px-3 py-2">${p.aztlan_id}</td>
+                    <td class="border border-gray-300 px-3 py-2">${p.name}</td>
+                    <td class="border border-gray-300 px-3 py-2">${p.email}</td>
+                    <td class="border border-gray-300 px-3 py-2">${p.academy}</td>
+                    <td class="border border-gray-300 px-3 py-2">${p.experience}</td>
+                    <td class="border border-gray-300 px-3 py-2">${p.belt || '-'}</td>
+                    <td class="border border-gray-300 px-3 py-2">${p.torneo}</td>
+                    <td class="border border-gray-300 px-3 py-2">${p.registered_at || '-'}</td>
+                    <td class="border border-gray-300 px-3 py-2">${p.weight || '-'}</td>
+                    <td class="border border-gray-300 px-3 py-2 text-center payment-cell">${spinner}</td>
+                    <td class="border border-gray-300 px-3 py-2 text-center">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="payment-switch" ${isPaymentComplete ? 'checked' : ''}>
+                            <span class="ml-2">${isPaymentComplete ? 'Completo' : 'Pendiente'}</span>
+                        </label>
+                    </td>
+                    <td class="border border-gray-300 px-3 py-2 text-center">
+                        <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn">Eliminar</button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+
+                // Comprobante de pago
+                const paymentCell = tr.querySelector('.payment-cell');
+                fetch(`${baseUrl}/participants/${p.aztlan_id}/payment-proof-url`)
+                    .then(res => (res.ok && res.status !== 204) ? res.json() : null)
+                    .then(data => {
+                        if (data && data.payment_proof_url) paymentCell.innerHTML = `<a href="${data.payment_proof_url}" target="_blank" class="text-blue-600 underline">Ver</a>`;
+                        else paymentCell.textContent = '-';
+                    })
+                    .catch(() => { paymentCell.textContent = 'Error'; });
+
+                // Switch de pago
+                const switchInput = tr.querySelector('.payment-switch');
+                switchInput.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    if (!confirm('¿Estás seguro que quieres actualizar?')) return;
+                    const newStatus = switchInput.checked;
+                    try {
+                        const resp = await fetch(`${baseUrl}/participants/${p.aztlan_id}/payment`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ is_payment_complete: newStatus })
+                        });
+                        if (!resp.ok) throw new Error('Error actualizando el estado');
+                        const result = await resp.json();
+                        switchInput.nextElementSibling.textContent = result.is_payment_complete ? 'Completo' : 'Pendiente';
+                        alert('Estado actualizado correctamente');
+                    } catch (err) {
+                        alert(err.message);
+                        switchInput.checked = !switchInput.checked;
+                    }
+                });
+
+                // Botón eliminar
+                const deleteBtn = tr.querySelector('.delete-btn');
+                deleteBtn.addEventListener('click', async () => {
+                    if (!confirm(`¿Deseas eliminar al participante ${p.name}?`)) return;
+                    try {
+                        const resp = await fetch(`${baseUrl}/participants/${p.aztlan_id}`, { method: 'DELETE' });
+                        if (!resp.ok) throw new Error('Error eliminando participante');
+                        const result = await resp.json();
+                        alert(result.message);
+                        location.reload();
+                    } catch (err) { alert(err.message); }
+                });
             }
-            const participants = await response.json();
-
-            if (participants.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="12" class="text-center p-4">No hay participantes</td></tr>`;
-            } else {
-                for (const p of participants) {
-                    const tr = document.createElement('tr');
-
-                    const spinner = `<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900 mx-auto"></div>`;
-                    const isPaymentComplete = p.is_payment_complete || false;
-
-                    tr.innerHTML = `
-                        <td class="border border-gray-300 px-3 py-2">${p.aztlan_id}</td>
-                        <td class="border border-gray-300 px-3 py-2">${p.name}</td>
-                        <td class="border border-gray-300 px-3 py-2">${p.email}</td>
-                        <td class="border border-gray-300 px-3 py-2">${p.academy}</td>
-                        <td class="border border-gray-300 px-3 py-2">${p.experience}</td>
-                        <td class="border border-gray-300 px-3 py-2">${p.belt || '-'}</td>
-                        <td class="border border-gray-300 px-3 py-2">${p.torneo}</td>
-                        <td class="border border-gray-300 px-3 py-2">${p.registered_at || '-'}</td>
-                        <td class="border border-gray-300 px-3 py-2">${p.weight || '-'}</td>
-                        <td class="border border-gray-300 px-3 py-2 text-center payment-cell">${spinner}</td>
-                        <td class="border border-gray-300 px-3 py-2 text-center">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="checkbox" class="payment-switch" ${isPaymentComplete ? 'checked' : ''}>
-                                <span class="ml-2">${isPaymentComplete ? 'Completo' : 'Pendiente'}</span>
-                            </label>
-                        </td>
-                        <td class="border border-gray-300 px-3 py-2 text-center">
-                            <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded delete-btn">Eliminar</button>
-                        </td>
-                    `;
-                    tableBody.appendChild(tr);
-
-                    // Comprobante de pago
-                    const paymentCell = tr.querySelector('.payment-cell');
-                    fetch(`${baseUrl}/participants/${p.aztlan_id}/payment-proof-url`)
-                        .then(res => (res.ok && res.status !== 204) ? res.json() : null)
-                        .then(data => {
-                            if (data && data.payment_proof_url) {
-                                paymentCell.innerHTML = `<a href="${data.payment_proof_url}" target="_blank" class="text-blue-600 underline">Ver</a>`;
-                            } else {
-                                paymentCell.textContent = '-';
-                            }
-                        })
-                        .catch(() => { paymentCell.textContent = 'Error'; });
-
-                    // Switch de actualización de pago
-                    const switchInput = tr.querySelector('.payment-switch');
-                    switchInput.addEventListener('click', async (e) => {
-                        e.preventDefault();
-                        const confirmUpdate = confirm('¿Estás seguro que quieres actualizar?');
-                        if (!confirmUpdate) return;
-
-                        const newStatus = switchInput.checked;
-                        try {
-                            const resp = await fetch(`${baseUrl}/participants/${p.aztlan_id}/payment`, {
-                                method: 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ is_payment_complete: newStatus })
-                            });
-                            if (!resp.ok) throw new Error('Error actualizando el estado');
-                            const result = await resp.json();
-                            switchInput.nextElementSibling.textContent = result.is_payment_complete ? 'Completo' : 'Pendiente';
-                            alert('Estado actualizado correctamente');
-                        } catch (err) {
-                            alert(err.message);
-                            switchInput.checked = !switchInput.checked;
-                        }
-                    });
-
-                    // Botón eliminar participante
-                    const deleteBtn = tr.querySelector('.delete-btn');
-                    deleteBtn.addEventListener('click', async () => {
-                        const confirmDelete = confirm(`¿Deseas eliminar al participante ${p.name}?`);
-                        if (!confirmDelete) return;
-
-                        try {
-                            const resp = await fetch(`${baseUrl}/participants/${p.aztlan_id}`, { method: 'DELETE' });
-                            if (!resp.ok) throw new Error('Error eliminando participante');
-                            const result = await resp.json();
-                            alert(result.message);
-                            location.reload(); // <-- recarga la página completa
-                        } catch (err) {
-                            alert(err.message);
-                        }
-                    }); 
-                }
-            }
-
-        } catch (err) {
-            errorMessage.textContent = err.message;
-            errorMessage.classList.remove('hidden');
-        } finally {
-            loading.classList.add('hidden');
         }
+    } catch (err) {
+        errorMessage.textContent = err.message;
+        errorMessage.classList.remove('hidden');
+    } finally {
+        loading.classList.add('hidden');
+    }
+});
+
+// Modal CSV
+generateCSVBtn.addEventListener('click', () => csvModal.classList.remove('hidden'));
+cancelCSV.addEventListener('click', () => csvModal.classList.add('hidden'));
+
+// Generar CSV
+downloadCSV.addEventListener('click', () => {
+    const belt = beltFilter.value;
+    let filtered = participantsData.filter(p => p.torneo === 'aztlan-2025-b');
+    if (belt !== 'all') filtered = filtered.filter(p => p.belt === belt);
+
+    if (filtered.length === 0) {
+        alert('No hay participantes para generar CSV');
+        return;
+    }
+
+    const csvRows = [];
+    const headers = ['Aztlan ID','Nombre','Email','Academia','Experiencia','Cinturón','Torneo','Registrado','Peso'];
+    csvRows.push(headers.join(','));
+
+    filtered.forEach(p => {
+        const row = [
+            p.aztlan_id,
+            `"${p.name}"`,
+            p.email,
+            `"${p.academy}"`,
+            p.experience,
+            p.belt || '-',
+            p.torneo,
+            p.registered_at || '-',
+            p.weight || '-'
+        ];
+        csvRows.push(row.join(','));
     });
+
+    const csvData = csvRows.join('\n');
+    const blob = new Blob([csvData], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `participantes_${belt}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    csvModal.classList.add('hidden');
+});
 </script>
 
 </body>
