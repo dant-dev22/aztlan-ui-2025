@@ -40,6 +40,7 @@
         const successModal = document.getElementById('successModal');
         const aztlanIDSpan = document.getElementById('aztlanID');
         const closeModalBtn = document.getElementById('closeModalBtn');
+        const successMessageP = document.getElementById('successMessageP');
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -51,32 +52,32 @@
             const months = parseInt(form.months.value) || 0;
             const totalMonths = (years * 12) + months;
 
-            const data = {
-                name: form.name.value,
-                birth_date: form.birth_date.value,
-                weight: parseFloat(form.weight.value),
-                academy: form.academy.value,
-                email: form.email.value,
-                belt: form.belt.value || "white",
-                torneo: form.torneo.value,
-                payment_proof: null,
-                experience: totalMonths 
-            };
+            // Usamos FormData para POST a FastAPI
+            const formData = new FormData();
+            formData.append('name', form.name.value);
+            formData.append('birth_date', form.birth_date.value);
+            formData.append('weight', parseFloat(form.weight.value));
+            formData.append('academy', form.academy.value);
+            formData.append('email', form.email.value);
+            formData.append('belt', form.belt.value || "white");
+            formData.append('torneo', form.torneo.value);
+            formData.append('experience', totalMonths);
 
             try {
-                const res = await fetch('https://vjfpbq4jbiz5uyarfu7z7ahlhi0xbhmi.lambda-url.us-east-1.on.aws/participants', {
+                const res = await fetch('/register', {  // 🚀 Ahora va a FastAPI
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: formData
                 });
-                const result = await res.json();
+                const resultText = await res.text();
 
                 if (!res.ok) {
-                    errorMessage.textContent = result.detail?.message || JSON.stringify(result);
+                    errorMessage.textContent = "Error al registrar participante."; // FastAPI renderiza HTML, no JSON
                     errorMessage.classList.remove('hidden');
                 } else {
-                    // Mostrar modal de éxito con Aztlán ID
-                    aztlanIDSpan.textContent = result.aztlan_id;
+                    // Mostrar modal de éxito con Aztlán ID extraído del HTML de respuesta
+                    // Si quieres obtener el ID, lo puedes renderizar en un span desde FastAPI
+                    aztlanIDSpan.textContent = res.aztlan_id;
+                    if (successMessageP) successMessageP.textContent = result.message;
                     successModal.classList.remove('hidden');
                     form.reset();
                 }
@@ -89,12 +90,12 @@
             }
         });
 
-        // Botón para cerrar modal
         closeModalBtn.addEventListener('click', () => {
             successModal.classList.add('hidden');
         });
     </script>
 
+    <!-- Código de selección de cinturón y fecha de nacimiento -->
     <script>
         const birthDateInput = document.querySelector('input[name="birth_date"]');
         const beltDiv = document.querySelector('select[name="belt"]').parentElement;

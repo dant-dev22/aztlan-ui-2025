@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
+
 from mangum import Mangum
-from email_sender import send_email
 import httpx
 
 app = FastAPI()
@@ -11,6 +12,15 @@ handler = Mangum(app)
 templates = Jinja2Templates(directory="templates")
 
 API_URL = "https://vjfpbq4jbiz5uyarfu7z7ahlhi0xbhmi.lambda-url.us-east-1.on.aws/participants"
+
+# 🔹 Configuración de CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -29,7 +39,8 @@ async def register_form(request: Request):
             "request": request,
             "form_data": {},
             "errors": {},
-            "message": None
+            "message": None,
+            "aztlan_id": ""
         }
     )
 
@@ -59,6 +70,7 @@ async def submit_form(
 
     message = None
     errors = {}
+    aztlan_id = ""
 
     try:
         async with httpx.AsyncClient() as client:
@@ -66,7 +78,7 @@ async def submit_form(
             response.raise_for_status()
             data = response.json()
 
-            aztlan_id = data.get("aztlan_id", "N/A")
+            aztlan_id = data.get("aztlan_id", "")
             message = f"Participant registered! ID: {aztlan_id}"
 
     except httpx.HTTPStatusError as exc:
@@ -79,15 +91,18 @@ async def submit_form(
     except Exception as e:
         errors["general"] = str(e)
 
+    # 🔹 Renderizamos el ID en el HTML para que JS lo tome
     return templates.TemplateResponse(
         "register.html",
         {
             "request": request,
             "message": message,
             "errors": errors,
-            "form_data": payload
+            "form_data": payload,
+            "aztlan_id": aztlan_id
         }
     )
+
 
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_dashboard(request: Request):
