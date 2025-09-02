@@ -60,7 +60,7 @@
                 const result = await res.json();
 
                 if (!result.success) {
-                    errorMessage.textContent = "Error al registrar participante.";
+                    errorMessage.textContent = result.errors.detail["message"];
                     errorMessage.classList.remove('hidden');
                     console.error(result.errors);
                 } else {

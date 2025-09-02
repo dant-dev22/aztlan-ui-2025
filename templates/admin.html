@@ -201,7 +201,7 @@ downloadCSV.addEventListener('click', () => {
     }
 
     const csvRows = [];
-    const headers = ['Aztlan ID','Nombre','Email','Academia','Experiencia','Cinturón','Torneo','Registrado','Peso'];
+    const headers = ['Aztlan ID','Nombre','Email','Academia','Experiencia(meses)','Cinturón','Torneo','Registrado','Peso'];
     csvRows.push(headers.join(','));
 
     filtered.forEach(p => {
