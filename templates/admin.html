@@ -31,6 +31,7 @@
                     <th class="border border-gray-300 px-3 py-2">Registrado</th>
                     <th class="border border-gray-300 px-3 py-2">Peso</th>
                     <th class="border border-gray-300 px-3 py-2">Comprobante de Pago</th>
+                    <th class="border border-gray-300 px-3 py-2">Actualizar Estado</th>
                 </tr>
             </thead>
             <tbody id="participantsTableBody">
@@ -61,13 +62,13 @@
             const participants = await response.json();
 
             if (participants.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="10" class="text-center p-4">No hay participantes</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="11" class="text-center p-4">No hay participantes</td></tr>`;
             } else {
                 for (const p of participants) {
                     const tr = document.createElement('tr');
 
-                    // Spinner inicial para comprobante
                     const spinner = `<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900 mx-auto"></div>`;
+                    const isPaymentComplete = p.is_payment_complete || false;
 
                     tr.innerHTML = `
                         <td class="border border-gray-300 px-3 py-2">${p.aztlan_id}</td>
@@ -80,22 +81,53 @@
                         <td class="border border-gray-300 px-3 py-2">${p.registered_at || '-'}</td>
                         <td class="border border-gray-300 px-3 py-2">${p.weight || '-'}</td>
                         <td class="border border-gray-300 px-3 py-2 text-center payment-cell">${spinner}</td>
+                        <td class="border border-gray-300 px-3 py-2 text-center">
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="payment-switch" ${isPaymentComplete ? 'checked' : ''}>
+                                <span class="ml-2">${isPaymentComplete ? 'Completo' : 'Pendiente'}</span>
+                            </label>
+                        </td>
                     `;
                     tableBody.appendChild(tr);
 
-                    // Obtener URL del comprobante de pago en background
+                    // Comprobante de pago
                     const paymentCell = tr.querySelector('.payment-cell');
-                    try {
-                        const proofResp = await fetch(`${baseUrl}/participants/${p.aztlan_id}/payment-proof-url`);
-                        if (proofResp.ok && proofResp.status !== 204) {
-                            const data = await proofResp.json();
-                            paymentCell.innerHTML = `<a href="${data.payment_proof_url}" target="_blank" class="text-blue-600 underline">Ver</a>`;
-                        } else {
-                            paymentCell.textContent = '-';
+                    fetch(`${baseUrl}/participants/${p.aztlan_id}/payment-proof-url`)
+                        .then(res => {
+                            if (res.ok && res.status !== 204) return res.json();
+                            else return null;
+                        })
+                        .then(data => {
+                            if (data && data.payment_proof_url) {
+                                paymentCell.innerHTML = `<a href="${data.payment_proof_url}" target="_blank" class="text-blue-600 underline">Ver</a>`;
+                            } else {
+                                paymentCell.textContent = '-';
+                            }
+                        })
+                        .catch(() => { paymentCell.textContent = 'Error'; });
+
+                    // Switch de actualización
+                    const switchInput = tr.querySelector('.payment-switch');
+                    switchInput.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        const confirmUpdate = confirm('¿Estás seguro que quieres actualizar?');
+                        const newStatus = switchInput.checked;
+                        try {
+                            const resp = await fetch(`${baseUrl}/participants/${p.aztlan_id}/payment`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ is_payment_complete: newStatus })
+                            });
+                            if (!resp.ok) throw new Error('Error actualizando el estado');
+                            const result = await resp.json();
+                            switchInput.nextElementSibling.textContent = result.is_payment_complete ? 'Completo' : 'Pendiente';
+                            alert('Estado actualizado correctamente');
+                        } catch (err) {
+                            alert(err.message);
+                            // Revertir switch en caso de error
+                            switchInput.checked = !switchInput.checked;
                         }
-                    } catch (e) {
-                        paymentCell.textContent = 'Error';
-                    }
+                    });
                 }
             }
 
