@@ -7,83 +7,106 @@
 </head>
 <body class="bg-gray-100 p-6">
 
-    <div class="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow">
-        <h1 class="text-2xl font-bold mb-4">Dashboard de Participantes</h1>
+<div class="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow">
+    <h1 class="text-2xl font-bold mb-4">Dashboard de Participantes</h1>
 
-        <button id="fetchParticipantsBtn" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition mb-4">
-            Obtener Participantes
-        </button>
+    <button id="fetchParticipantsBtn" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition mb-4">
+        Obtener Participantes
+    </button>
 
-        <div id="loading" class="hidden text-gray-700 mb-4">Cargando participantes...</div>
-        <div id="errorMessage" class="hidden text-red-600 mb-4"></div>
+    <div id="loading" class="hidden text-gray-700 mb-4">Cargando participantes...</div>
+    <div id="errorMessage" class="hidden text-red-600 mb-4"></div>
 
-        <div class="overflow-x-auto">
-            <table class="min-w-full table-auto border-collapse border border-gray-300">
-                <thead class="bg-gray-200">
-                    <tr>
-                        <th class="border border-gray-300 px-3 py-2">Aztlan ID</th>
-                        <th class="border border-gray-300 px-3 py-2">Nombre</th>
-                        <th class="border border-gray-300 px-3 py-2">Email</th>
-                        <th class="border border-gray-300 px-3 py-2">Academia</th>
-                        <th class="border border-gray-300 px-3 py-2">Experiencia</th>
-                        <th class="border border-gray-300 px-3 py-2">Cinturón</th>
-                        <th class="border border-gray-300 px-3 py-2">Torneo</th>
-                        <th class="border border-gray-300 px-3 py-2">Registrado</th>
-                        <th class="border border-gray-300 px-3 py-2">Peso</th>
-                    </tr>
-                </thead>
-                <tbody id="participantsTableBody">
-                    <!-- Aquí se agregan los registros dinámicamente -->
-                </tbody>
-            </table>
-        </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full table-auto border-collapse border border-gray-300">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="border border-gray-300 px-3 py-2">Aztlan ID</th>
+                    <th class="border border-gray-300 px-3 py-2">Nombre</th>
+                    <th class="border border-gray-300 px-3 py-2">Email</th>
+                    <th class="border border-gray-300 px-3 py-2">Academia</th>
+                    <th class="border border-gray-300 px-3 py-2">Experiencia</th>
+                    <th class="border border-gray-300 px-3 py-2">Cinturón</th>
+                    <th class="border border-gray-300 px-3 py-2">Torneo</th>
+                    <th class="border border-gray-300 px-3 py-2">Registrado</th>
+                    <th class="border border-gray-300 px-3 py-2">Peso</th>
+                    <th class="border border-gray-300 px-3 py-2">Comprobante de Pago</th>
+                </tr>
+            </thead>
+            <tbody id="participantsTableBody">
+                <!-- Aquí se agregan los registros dinámicamente -->
+            </tbody>
+        </table>
     </div>
+</div>
 
-    <script>
-        const fetchBtn = document.getElementById('fetchParticipantsBtn');
-        const tableBody = document.getElementById('participantsTableBody');
-        const loading = document.getElementById('loading');
-        const errorMessage = document.getElementById('errorMessage');
+<script>
+    const fetchBtn = document.getElementById('fetchParticipantsBtn');
+    const tableBody = document.getElementById('participantsTableBody');
+    const loading = document.getElementById('loading');
+    const errorMessage = document.getElementById('errorMessage');
 
-        fetchBtn.addEventListener('click', async () => {
-            loading.classList.remove('hidden');
-            errorMessage.classList.add('hidden');
-            tableBody.innerHTML = '';
+    const baseUrl = 'https://vjfpbq4jbiz5uyarfu7z7ahlhi0xbhmi.lambda-url.us-east-1.on.aws';
 
-            try {
-                const response = await fetch('https://vjfpbq4jbiz5uyarfu7z7ahlhi0xbhmi.lambda-url.us-east-1.on.aws/participants?torneo=aztlan-2025-b&limit=100');
-                if (!response.ok) {
-                    throw new Error(`Error al obtener participantes: ${response.statusText}`);
-                }
-                const participants = await response.json();
+    fetchBtn.addEventListener('click', async () => {
+        loading.classList.remove('hidden');
+        errorMessage.classList.add('hidden');
+        tableBody.innerHTML = '';
 
-                if (participants.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="9" class="text-center p-4">No hay participantes</td></tr>`;
-                } else {
-                    participants.forEach(p => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td class="border border-gray-300 px-3 py-2">${p.aztlan_id}</td>
-                            <td class="border border-gray-300 px-3 py-2">${p.name}</td>
-                            <td class="border border-gray-300 px-3 py-2">${p.email}</td>
-                            <td class="border border-gray-300 px-3 py-2">${p.academy}</td>
-                            <td class="border border-gray-300 px-3 py-2">${p.experience}</td>
-                            <td class="border border-gray-300 px-3 py-2">${p.belt || '-'}</td>
-                            <td class="border border-gray-300 px-3 py-2">${p.torneo}</td>
-                            <td class="border border-gray-300 px-3 py-2">${p.weight || '-'}</td>
-                        `;
-                        tableBody.appendChild(tr);
-                    });
-                }
-
-            } catch (err) {
-                errorMessage.textContent = err.message;
-                errorMessage.classList.remove('hidden');
-            } finally {
-                loading.classList.add('hidden');
+        try {
+            const response = await fetch(`${baseUrl}/participants?torneo=aztlan-2025-b&limit=100`);
+            if (!response.ok) {
+                throw new Error(`Error al obtener participantes: ${response.statusText}`);
             }
-        });
-    </script>
+            const participants = await response.json();
+
+            if (participants.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="10" class="text-center p-4">No hay participantes</td></tr>`;
+            } else {
+                for (const p of participants) {
+                    const tr = document.createElement('tr');
+
+                    // Spinner inicial para comprobante
+                    const spinner = `<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-900 mx-auto"></div>`;
+
+                    tr.innerHTML = `
+                        <td class="border border-gray-300 px-3 py-2">${p.aztlan_id}</td>
+                        <td class="border border-gray-300 px-3 py-2">${p.name}</td>
+                        <td class="border border-gray-300 px-3 py-2">${p.email}</td>
+                        <td class="border border-gray-300 px-3 py-2">${p.academy}</td>
+                        <td class="border border-gray-300 px-3 py-2">${p.experience}</td>
+                        <td class="border border-gray-300 px-3 py-2">${p.belt || '-'}</td>
+                        <td class="border border-gray-300 px-3 py-2">${p.torneo}</td>
+                        <td class="border border-gray-300 px-3 py-2">${p.registered_at || '-'}</td>
+                        <td class="border border-gray-300 px-3 py-2">${p.weight || '-'}</td>
+                        <td class="border border-gray-300 px-3 py-2 text-center payment-cell">${spinner}</td>
+                    `;
+                    tableBody.appendChild(tr);
+
+                    // Obtener URL del comprobante de pago en background
+                    const paymentCell = tr.querySelector('.payment-cell');
+                    try {
+                        const proofResp = await fetch(`${baseUrl}/participants/${p.aztlan_id}/payment-proof-url`);
+                        if (proofResp.ok && proofResp.status !== 204) {
+                            const data = await proofResp.json();
+                            paymentCell.innerHTML = `<a href="${data.payment_proof_url}" target="_blank" class="text-blue-600 underline">Ver</a>`;
+                        } else {
+                            paymentCell.textContent = '-';
+                        }
+                    } catch (e) {
+                        paymentCell.textContent = 'Error';
+                    }
+                }
+            }
+
+        } catch (err) {
+            errorMessage.textContent = err.message;
+            errorMessage.classList.remove('hidden');
+        } finally {
+            loading.classList.add('hidden');
+        }
+    });
+</script>
 
 </body>
 </html>
