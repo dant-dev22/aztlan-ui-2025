@@ -7,7 +7,7 @@
 </head>
 <body class="bg-gray-100 p-10">
 
-    <!-- Aquí incluimos el formulario modular -->
+    <!-- Formulario modular -->
     <section id="register-form">
         {% include "register_form.html" %}
     </section>
@@ -33,6 +33,9 @@
         </div>
     </div>
 
+    <!-- Mensaje de error -->
+    <div id="errorMessage" class="hidden bg-red-100 text-red-800 p-4 mb-4 rounded"></div>
+
     <script>
         const form = document.getElementById('registerForm');
         const loading = document.getElementById('loading');
@@ -40,44 +43,28 @@
         const successModal = document.getElementById('successModal');
         const aztlanIDSpan = document.getElementById('aztlanID');
         const closeModalBtn = document.getElementById('closeModalBtn');
-        const successMessageP = document.getElementById('successMessageP');
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             loading.classList.remove('hidden');
             errorMessage.classList.add('hidden');
 
-            // 🔹 Calcular experiencia en meses
-            const years = parseInt(form.years.value) || 0;
-            const months = parseInt(form.months.value) || 0;
-            const totalMonths = (years * 12) + months;
+            // Calcular experiencia en meses
+            const totalMonths = (parseInt(form.years.value) || 0) * 12 + (parseInt(form.months.value) || 0);
 
-            // Usamos FormData para POST a FastAPI
-            const formData = new FormData();
-            formData.append('name', form.name.value);
-            formData.append('birth_date', form.birth_date.value);
-            formData.append('weight', parseFloat(form.weight.value));
-            formData.append('academy', form.academy.value);
-            formData.append('email', form.email.value);
-            formData.append('belt', form.belt.value || "white");
-            formData.append('torneo', form.torneo.value);
-            formData.append('experience', totalMonths);
+            const formData = new FormData(form);
+            formData.set('experience', totalMonths);
 
             try {
-                const res = await fetch('/register', {  // 🚀 Ahora va a FastAPI
-                    method: 'POST',
-                    body: formData
-                });
-                const resultText = await res.text();
+                const res = await fetch('/register', { method: 'POST', body: formData });
+                const result = await res.json();
 
-                if (!res.ok) {
-                    errorMessage.textContent = "Error al registrar participante."; // FastAPI renderiza HTML, no JSON
+                if (!result.success) {
+                    errorMessage.textContent = "Error al registrar participante.";
                     errorMessage.classList.remove('hidden');
+                    console.error(result.errors);
                 } else {
-                    // Mostrar modal de éxito con Aztlán ID extraído del HTML de respuesta
-                    // Si quieres obtener el ID, lo puedes renderizar en un span desde FastAPI
-                    aztlanIDSpan.textContent = res.aztlan_id;
-                    if (successMessageP) successMessageP.textContent = result.message;
+                    aztlanIDSpan.textContent = result.aztlan_id;
                     successModal.classList.remove('hidden');
                     form.reset();
                 }

@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -45,9 +45,8 @@ async def register_form(request: Request):
     )
 
 
-@app.post("/register", response_class=HTMLResponse)
+@app.post("/register")
 async def submit_form(
-    request: Request,
     name: str = Form(...),
     birth_date: str = Form(...),
     weight: float = Form(...),
@@ -57,51 +56,22 @@ async def submit_form(
     belt: str | None = Form("white"),
     torneo: str = Form(...),
 ):
-    payload = {
-        "name": name,
-        "birth_date": birth_date,
-        "weight": weight,
-        "academy": academy,
-        "experience": experience,
-        "email": email,
-        "belt": belt,
-        "torneo": torneo
-    }
-
-    message = None
-    errors = {}
-    aztlan_id = ""
+    payload = { "name": name, "birth_date": birth_date, "weight": weight,
+                "academy": academy, "experience": experience, "email": email,
+                "belt": belt, "torneo": torneo }
 
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(API_URL, json=payload)
             response.raise_for_status()
             data = response.json()
-
             aztlan_id = data.get("aztlan_id", "")
-            message = f"Participant registered! ID: {aztlan_id}"
-
+            return JSONResponse({"success": True, "aztlan_id": aztlan_id, 
+                                 "message": f"Participant registered! ID: {aztlan_id}"})
     except httpx.HTTPStatusError as exc:
-        detail = exc.response.json().get("detail", {})
-        if isinstance(detail, dict) and "field" in detail and "message" in detail:
-            errors[detail["field"]] = detail["message"]
-        else:
-            errors["general"] = str(detail)
-
+        return JSONResponse({"success": False, "errors": exc.response.json()})
     except Exception as e:
-        errors["general"] = str(e)
-
-    # 🔹 Renderizamos el ID en el HTML para que JS lo tome
-    return templates.TemplateResponse(
-        "register.html",
-        {
-            "request": request,
-            "message": message,
-            "errors": errors,
-            "form_data": payload,
-            "aztlan_id": aztlan_id
-        }
-    )
+        return JSONResponse({"success": False, "errors": str(e)})
 
 
 @app.get("/admin", response_class=HTMLResponse)
